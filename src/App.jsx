@@ -295,56 +295,113 @@ const Footer = () => (
     </footer>
 );
 
+// --- Data Generation ---
+
+const CLIENTS = ['Samsung', 'Spotify', 'Amex', 'Microsoft', 'Google', 'Nike', 'Apple', 'Tesla', 'Adidas', 'Sony'];
+const PILLARS = ['CONTENT', 'DESIGN', 'PRODUCTION', 'INFLUENCER'];
+
+// Generate Random Assets (The "Filler" Content)
+const generateRandomAssets = (count = 100) => {
+    return Array.from({ length: count }).map((_, i) => {
+        const type = Math.random() > 0.4 ? 'image' : 'video'; // 60% images, 40% videos
+        const pillar = PILLARS[Math.floor(Math.random() * PILLARS.length)];
+        return {
+            id: `random-${i}`,
+            type,
+            url: type === 'image'
+                ? `https://picsum.photos/seed/${i + 100}/800/${Math.random() > 0.5 ? '1000' : '600'}`
+                : 'https://videos.pexels.com/video-files/8538668/8538668-hd_1080_1920_25fps.mp4', // Placeholder video
+            title: `${pillar} ${type === 'image' ? 'Campaign' : 'Reel'} ${2024 + i}`,
+            client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
+            pillar,
+            score: Math.floor(Math.random() * 20) + 80, // 80-99%
+            isCustom: false
+        };
+    });
+};
+
+// Custom Assets (Placeholders for AWS S3 URLs)
+const getCustomAssets = () => {
+    // TODO: Replace these with actual AWS S3 URLs provided by user
+    const imageUrls = [
+        // Paste Image URLs here
+    ];
+
+    const videoUrls = [
+        // Paste Video URLs here
+    ];
+
+    const customImages = imageUrls.map((url, i) => ({
+        id: `custom-image-${i}`,
+        type: 'image',
+        url: url, // Use actual URL
+        title: 'Merch // Cylndr x Brandstudios.Ai',
+        client: 'Merch // Cylndr x Brandstudios.Ai',
+        pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)], // Random pillar for variety? Or specific?
+        score: Math.floor(Math.random() * 10) + 90, // 90-99%
+        isCustom: true
+    }));
+
+    const customVideos = videoUrls.map((url, i) => ({
+        id: `custom-video-${i}`,
+        type: 'video',
+        url: url, // Use actual URL
+        title: 'Merch // Cylndr x Brandstudios.Ai',
+        client: 'Merch // Cylndr x Brandstudios.Ai',
+        pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)],
+        score: Math.floor(Math.random() * 10) + 90, // 90-99%
+        isCustom: true
+    }));
+
+    return [...customImages, ...customVideos];
+};
+
+
 export default function App() {
     const [activePillar, setActivePillar] = useState('ALL');
-    const [assets, setAssets] = useState([]);
     const [selectedAsset, setSelectedAsset] = useState(null);
-    const [loading, setLoading] = useState(true);
+
+    // Memoize assets
+    const randomAssets = useMemo(() => generateRandomAssets(60), []); // Reduced count since we'll add custom ones
+    const customAssets = useMemo(() => getCustomAssets(), []);
+
+    // Combined assets for ALL view (Shuffled)
+    const allAssets = useMemo(() => {
+        const combined = [...randomAssets, ...customAssets];
+        // Fisher-Yates Shuffle
+        for (let i = combined.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [combined[i], combined[j]] = [combined[j], combined[i]];
+        }
+        return combined;
+    }, [randomAssets, customAssets]);
+
+    // Filtering Logic
+    const displayedAssets = useMemo(() => {
+        if (activePillar === 'ALL') {
+            return allAssets; // Mixed Random + Custom
+        }
+        if (activePillar === 'IMAGES') {
+            // ONLY Custom Images
+            return customAssets.filter(a => a.type === 'image');
+        }
+        if (activePillar === 'VIDEOS') {
+            // ONLY Custom Videos
+            return customAssets.filter(a => a.type === 'video');
+        }
+        return allAssets;
+    }, [activePillar, allAssets, customAssets]);
 
     // Derive current theme colors based on selection
     const currentTheme = THEMES[activePillar];
 
-    useEffect(() => {
-        // Simulate data load
-        setTimeout(() => {
-            setAssets(generateMockAssets());
-            setLoading(false);
-        }, 1200);
-    }, []);
-
-    const displayedAssets = useMemo(() => {
-        if (activePillar === 'ALL') return assets;
-        if (activePillar === 'IMAGES') return assets.filter(a => a.type === 'image');
-        if (activePillar === 'VIDEOS') return assets.filter(a => a.type === 'video');
-        return assets;
-    }, [assets, activePillar]);
-
     // Dynamic background style for the hero section
     const heroStyle = {
-        backgroundColor: activePillar === 'ALL' ? '#0e0d1d' : (activePillar === 'IMAGES' ? '#fff6ec' : '#025f1d'),
-        color: activePillar === 'ALL' ? '#fff6ec' : (activePillar === 'IMAGES' ? '#0e0d1d' : '#fff6ec')
+        backgroundColor: THEMES[activePillar].bg.replace('bg-', '') === 'carbon' ? '#0e0d1d' :
+            THEMES[activePillar].bg.replace('bg-', '') === 'lead-white' ? '#fff6ec' :
+                THEMES[activePillar].bg.replace('bg-', '') === 'oxidized-green' ? '#025f1d' : '#fff6ec',
+        color: THEMES[activePillar].text.replace('text-', '') === 'lead-white' ? '#fff6ec' : '#0e0d1d',
     };
-
-    if (loading) {
-        return (
-            <div className="h-screen w-screen bg-carbon flex flex-col items-center justify-center text-white relative overflow-hidden">
-                {/* Static Noise Overlay */}
-                <div className="absolute inset-0 z-0 opacity-10" style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
-                }} />
-
-                <div className="flex flex-col items-center gap-6 z-10">
-                    <div className="text-6xl font-black tracking-tighter animate-pulse">CYLNDR</div>
-                    <div className="flex gap-2">
-                        {['#FF4D00', '#00FFFF', '#CCFF00', '#9333EA'].map((c, i) => (
-                            <div key={i} className="w-3 h-3" style={{ backgroundColor: c }} />
-                        ))}
-                    </div>
-                    <div className="font-headline text-[10px] tracking-[0.3em]">INITIALIZING...</div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-lead-white text-carbon font-body selection:bg-carbon selection:text-white overflow-x-hidden relative">
