@@ -77,7 +77,7 @@ const Header = ({ activePillar, setActivePillar }) => {
     const isDark = ['ALL', 'VIDEOS', 'PRODUCTION', 'DESIGN'].includes(activePillar);
 
     return (
-        <header className={`fixed top-0 left-0 right-0 z-50 border-b-4 border-carbon h-20 shadow-sm transition-colors duration-300 ${isDark ? 'bg-carbon' : 'bg-lead-white'}`}>
+        <header className={`fixed top-0 left-0 right-0 z-50 h-20 shadow-sm transition-colors duration-300 ${isDark ? 'bg-[#0e0d1d]' : 'bg-[#fff6ec] border-b-4 border-carbon'}`}>
             <div className="max-w-[2000px] mx-auto px-6 h-full flex items-center justify-between">
 
                 {/* Logo Area */}
@@ -119,16 +119,26 @@ const Header = ({ activePillar, setActivePillar }) => {
     );
 };
 
-const AssetCard = ({ asset, onClick, themeColor }) => {
+const AssetCard = ({ asset, onClick, themeColor, isDark }) => {
     return (
         <div
             className="group break-inside-avoid mb-4 cursor-pointer"
             onClick={() => onClick(asset)}
         >
-            <div className="relative w-full bg-lead-white border-2 border-carbon transition-transform duration-200 hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#0e0d1d]">
+            <div
+                className={`relative w-full border-2 transition-transform duration-200 hover:-translate-y-1 ${isDark ? 'bg-carbon border-lead-white' : 'bg-lead-white border-carbon'}`}
+                style={{
+                    boxShadow: '0 0 0 0 transparent',
+                }}
+            >
+                {/* Custom Hover Shadow via inline styles for dynamic color */}
+                <div
+                    className="absolute inset-0 -z-10 transition-all duration-200 group-hover:translate-x-[4px] group-hover:translate-y-[4px]"
+                    style={{ backgroundColor: isDark ? themeColor : '#0e0d1d' }}
+                />
 
                 {/* Media */}
-                <div className={`relative w-full ${asset.type === 'video' ? 'aspect-video' : 'aspect-[3/4]'} border-b-2 border-carbon overflow-hidden bg-lead-white`}>
+                <div className={`relative w-full ${asset.type === 'video' ? 'aspect-video' : 'aspect-[3/4]'} border-b-2 overflow-hidden ${isDark ? 'bg-carbon border-lead-white' : 'bg-lead-white border-carbon'}`}>
                     {/* Tint Overlay on Hover */}
                     <div
                         className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-0 z-10 mix-blend-multiply"
@@ -144,23 +154,23 @@ const AssetCard = ({ asset, onClick, themeColor }) => {
 
                     {/* Type Icon */}
                     <div className="absolute top-3 right-3 z-20">
-                        <div className="bg-carbon text-white p-1">
+                        <div className={`p-1 ${isDark ? 'bg-lead-white text-carbon' : 'bg-carbon text-white'}`}>
                             {asset.type === 'video' ? <Play className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
                         </div>
                     </div>
                 </div>
 
                 {/* Info Panel */}
-                <div className="p-2 bg-lead-white">
+                <div className={`p-2 ${isDark ? 'bg-carbon' : 'bg-lead-white'}`}>
                     <div className="flex items-center gap-2 mb-2">
                         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: THEMES[asset.pillar].color }} />
-                        <span className="text-[9px] font-bold text-carbon uppercase tracking-widest">{asset.pillar}</span>
+                        <span className={`text-[9px] font-bold uppercase tracking-widest ${isDark ? 'text-lead-white' : 'text-carbon'}`}>{asset.pillar}</span>
                     </div>
-                    <h3 className="text-carbon text-[10px] font-bold leading-tight uppercase mb-2 line-clamp-2">{asset.title}</h3>
+                    <h3 className={`text-[10px] font-bold leading-tight uppercase mb-2 line-clamp-2 ${isDark ? 'text-lead-white' : 'text-carbon'}`}>{asset.title}</h3>
 
-                    <div className="flex justify-between items-end border-t border-zinc-200 pt-1 mt-2">
-                        <span className="text-[10px] font-headline text-carbon/50 uppercase">{asset.client}</span>
-                        <span className="text-[10px] font-headline font-bold text-carbon">{asset.score}%</span>
+                    <div className={`flex justify-between items-end border-t pt-1 mt-2 ${isDark ? 'border-lead-white/20' : 'border-zinc-200'}`}>
+                        <span className={`text-[10px] font-headline uppercase ${isDark ? 'text-lead-white/50' : 'text-carbon/50'}`}>{asset.client}</span>
+                        <span className={`text-[10px] font-headline font-bold ${isDark ? 'text-lead-white' : 'text-carbon'}`}>{asset.score}%</span>
                     </div>
                 </div>
             </div>
@@ -352,8 +362,8 @@ export default function App() {
 
 
                         <h2 className="text-6xl md:text-9xl font-black tracking-[-0.04em] leading-[0.85] uppercase max-w-5xl">
-                            Modern Content,<br />
-                            <span className={activePillar === 'ALL' ? 'text-carbon/60' : 'text-carbon/40'}>
+                            <span className="font-headline">Modern Content,</span><br />
+                            <span className={`font-serif italic ${activePillar === 'IMAGES' ? 'text-carbon/40' : 'text-lead-white/60'}`}>
                                 Powered By Design.
                             </span>
                         </h2>
@@ -377,13 +387,14 @@ export default function App() {
                         ))}
                     </div>
 
-                    <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 gap-4 space-y-4">
+                    <div className="columns-2 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-8 gap-4 space-y-4">
                         {displayedAssets.map((asset) => (
                             <AssetCard
                                 key={asset.id}
                                 asset={asset}
                                 onClick={setSelectedAsset}
                                 themeColor={THEMES[asset.pillar].color}
+                                isDark={activePillar === 'ALL'}
                             />
                         ))}
                     </div>

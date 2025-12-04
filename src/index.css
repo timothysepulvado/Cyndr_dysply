@@ -1,3 +1,15 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+    --color-carbon: #0e0d1d;
+    --color-lead-white: #fff6ec;
+    --color-catalyst-neon: #eeff00;
+    --color-oxidized-green: #025f1d;
+    --color-heat: #ff3800;
+    --color-verdigris: #64ccc9;
+    --color-manganese-violet: #c964cf;
+
+    --font-headline: 'Oswald', sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-body: 'DM Sans', sans-serif;
+}
