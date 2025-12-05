@@ -145,12 +145,23 @@ const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark })
                         style={{ backgroundColor: themeColor }}
                     />
 
-                    <img
-                        src={asset.url}
-                        alt={asset.title}
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                        loading="lazy"
-                    />
+                    {asset.type === 'video' ? (
+                        <video
+                            src={asset.url}
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                        />
+                    ) : (
+                        <img
+                            src={asset.url}
+                            alt={asset.title}
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
+                            loading="lazy"
+                        />
+                    )}
 
                     {/* Type Icon */}
                     <div className="absolute top-3 right-3 z-20">
@@ -215,11 +226,22 @@ const DetailView = ({ asset, onClose }) => {
                 <div className="flex-grow relative bg-lead-white flex items-center justify-center border-b-4 md:border-b-0 md:border-r-4 border-carbon overflow-hidden group">
                     <div className="absolute inset-0 opacity-5 mix-blend-multiply pointer-events-none" style={{ backgroundColor: theme.color }} />
 
-                    <img
-                        src={asset.url}
-                        className="max-w-[90%] max-h-[90%] object-contain shadow-2xl border-2 border-carbon"
-                        alt="Detail"
-                    />
+                    {asset.type === 'video' ? (
+                        <video
+                            src={asset.url}
+                            className="max-w-[90%] max-h-[90%] object-contain shadow-2xl border-2 border-carbon"
+                            controls
+                            autoPlay
+                            loop
+                            muted
+                        />
+                    ) : (
+                        <img
+                            src={asset.url}
+                            className="max-w-[90%] max-h-[90%] object-contain shadow-2xl border-2 border-carbon"
+                            alt="Detail"
+                        />
+                    )}
 
                     {/* Floating Pillar Tag */}
                     <div className="absolute top-6 left-6 bg-carbon text-white px-4 py-2 text-xs font-bold tracking-widest uppercase border-2 border-white">
@@ -503,9 +525,17 @@ export default function App() {
     const [activePillar, setActivePillar] = useState('ALL');
     const [selectedAsset, setSelectedAsset] = useState(null);
 
-    // Curation State
-    const [removedIds, setRemovedIds] = useState(new Set());
+    // Curation State - Load from localStorage on mount
+    const [removedIds, setRemovedIds] = useState(() => {
+        const saved = localStorage.getItem('cylndr-removed-assets');
+        return saved ? new Set(JSON.parse(saved)) : new Set();
+    });
     const [isEditMode, setIsEditMode] = useState(true);
+
+    // Save removed IDs to localStorage whenever they change
+    useEffect(() => {
+        localStorage.setItem('cylndr-removed-assets', JSON.stringify([...removedIds]));
+    }, [removedIds]);
 
     // Memoize assets
     const randomAssets = useMemo(() => generateRandomAssets(60), []); // Reduced count since we'll add custom ones
@@ -546,13 +576,37 @@ export default function App() {
 
     const handleExport = () => {
         const keptAssets = customAssets.filter(a => !removedIds.has(a.id));
-        const keptImages = keptAssets.filter(a => a.type === 'image').map(a => a.url);
+        const keptImages = keptAssets.filter(a => a.type === 'image');
         const keptVideos = keptAssets.filter(a => a.type === 'video').map(a => a.url);
 
-        console.log('--- KEPT ASSETS ---');
-        console.log('IMAGES:', JSON.stringify(keptImages));
-        console.log('VIDEOS:', JSON.stringify(keptVideos));
-        alert('Asset lists exported to Console. Copy them to update the code.');
+        // Extract filenames from image URLs
+        const keptImageFilenames = keptImages.map(img => {
+            const url = img.url;
+            return url.substring(url.lastIndexOf('/') + 1);
+        });
+
+        // Generate ready-to-paste code
+        const imageArrayCode = `const imageFilenames = [\n${keptImageFilenames.map(name => `        '${name}'`).join(',\n')}\n    ];`;
+        const videoArrayCode = `const videoUrls = [\n${keptVideos.map(url => `        '${url}'`).join(',\n')}\n    ];`;
+
+        console.clear();
+        console.log('=== COPY THIS CODE TO PERMANENTLY UPDATE App.jsx ===\n');
+        console.log('// Replace imageFilenames array (lines 342-344)');
+        console.log(imageArrayCode);
+        console.log('\n// Replace videoUrls array (lines 346-472)');
+        console.log(videoArrayCode);
+        console.log('\n=== STATS ===');
+        console.log(`Images - Kept: ${keptImageFilenames.length}, Removed: ${customAssets.filter(a => a.type === 'image').length - keptImageFilenames.length}`);
+        console.log(`Videos - Kept: ${keptVideos.length}, Removed: ${customAssets.filter(a => a.type === 'video').length - keptVideos.length}`);
+
+        alert(`✅ Export Complete!\n\nImages: ${keptImageFilenames.length} kept\nVideos: ${keptVideos.length} kept\n\nCode copied to console - paste both arrays into App.jsx to make changes permanent.`);
+    };
+
+    const handleReset = () => {
+        if (confirm('Reset all deletions? This will bring back all removed assets.')) {
+            setRemovedIds(new Set());
+            localStorage.removeItem('cylndr-removed-assets');
+        }
     };
 
     // Derive current theme colors based on selection
@@ -646,12 +700,21 @@ export default function App() {
                 </button>
 
                 {isEditMode && (
-                    <button
-                        onClick={handleExport}
-                        className="flex items-center gap-2 px-4 py-3 bg-oxidized-green text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-green-700 transition-colors"
-                    >
-                        <Save className="w-4 h-4" /> Export List
-                    </button>
+                    <>
+                        <button
+                            onClick={handleExport}
+                            className="flex items-center gap-2 px-4 py-3 bg-oxidized-green text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-green-700 transition-colors"
+                        >
+                            <Save className="w-4 h-4" /> Export Code
+                        </button>
+
+                        <button
+                            onClick={handleReset}
+                            className="flex items-center gap-2 px-4 py-3 bg-heat text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-red-700 transition-colors"
+                        >
+                            <X className="w-4 h-4" /> Reset All
+                        </button>
+                    </>
                 )}
             </div>
         </div>
