@@ -304,28 +304,18 @@ const DetailView = ({ asset, onClose }) => {
 
 const Footer = () => (
     <footer className="bg-carbon text-white py-12 border-t-4 border-white">
-        <div className="max-w-[2000px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="max-w-[2000px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
-                <h4 className="text-[10px] font-headline text-carbon/50 uppercase tracking-widest mb-4">Leadership</h4>
-                <ul className="space-y-2 text-xs font-bold uppercase tracking-wide text-zinc-300">
-                    <li>Sylvain Tron <span className="text-carbon/60 ml-1">// MD</span></li>
-                    <li>Kara O'Halloran <span className="text-carbon/60 ml-1">// Exec Dir</span></li>
-                    <li>Suz Keen <span className="text-carbon/60 ml-1">// ECD</span></li>
-                    <li>Can Misirlioglu <span className="text-carbon/60 ml-1">// ECD</span></li>
-                    <li>Abby Bako <span className="text-carbon/60 ml-1">// Dir Inf</span></li>
-                </ul>
-            </div>
-            <div className="md:col-span-2">
-                <h4 className="text-[10px] font-headline text-carbon/50 uppercase tracking-widest mb-4">Statement</h4>
-                <p className="text-xl md:text-3xl font-black uppercase leading-[0.9] tracking-tighter text-white max-w-lg">
-                    Modern Content, <span className="text-carbon/50">Powered by Design.</span>
+                <p className="text-xl md:text-3xl font-black uppercase leading-[0.9] tracking-tighter text-white">
+                    Modern Content, <span className="text-zinc-500">Powered by Design.</span>
                 </p>
             </div>
-            <div className="flex flex-col justify-between items-start md:items-end">
-                <div className="w-16 h-16 border-2 border-white rounded-full flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center md:items-end gap-4">
+                <div className="w-16 h-16 border-2 border-white rounded-full flex items-center justify-center">
                     <span className="font-serif italic text-2xl">C</span>
                 </div>
-                <span className="text-[10px] font-headline text-carbon/50">© 2025 CYLNDR STUDIOS</span>
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">BrandStudios.Ai</span>
+                <span className="text-[10px] text-zinc-600">© 2025 CYLNDR STUDIOS</span>
             </div>
         </div>
     </footer>
