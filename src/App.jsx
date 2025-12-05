@@ -382,6 +382,9 @@ const extractLocation = (filename) => {
     if (/MM18_/i.test(filename)) return 'Rooftops';  // Musician
     if (/MM08_/i.test(filename)) return 'Rooftops';  // Creator
     if (/MM04_/i.test(filename)) return 'Rooftops';  // Edit suite
+    if (/MM03_/i.test(filename)) return 'Rooftops';  // Hoodie on cinema chair
+    if (/MM43_/i.test(filename)) return 'Rooftops';  // Matchbooks bar
+    if (/S86_Socks/i.test(filename)) return 'Rooftops';  // Socks with skirt
 
     // Creative Studios (rest go here)
     if (/MM27_/i.test(filename)) return 'Creative Studios';
@@ -495,10 +498,14 @@ const getCustomAssets = () => {
         'S28_Studios_PrescriptionTee_Laydown_9x16.png',
         'S29_Studios_OrangeSocks_9x16.png',
         'S30_Studios_EngineBlockTee_Laydown_9x16.png',
+        'S31_Rooftops_HoodieSilhouette_4x5.png',
         'S32_Rooftops_GreenHat_4x5.png',
+        'S34_Rooftops_ToteOnLedge_16x9.png',
         'S35_Rooftops_BlackDevineTee_16x9.png',
         'S36_Rooftops_ContentMachineTee_16x9.png',
+        'S37_Rooftops_MeltingPotTee_9x16.png',
         'S39_Rooftops_NalgeneCityView_9x16.png',
+        'MM45_Life_CombustionTee_Rooftop_4k.png',
         'S40_Parks_CanvasTote_4x5.png',
         'S41_Parks_GreenCardigan_4x5.png',
         'S42_Parks_GymTowel_16x9.png',
