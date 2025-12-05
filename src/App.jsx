@@ -360,32 +360,39 @@ const generateRandomAssets = (count = 100) => {
 const S3_BASE_URL = 'https://brandstudiosai-cylndr.s3.us-east-2.amazonaws.com';
 
 // Helper function to extract location from filename
+// Consolidates ALL assets into 5 categories: Urban Streets, Cafés, Creative Studios, Rooftops, Parks
 const extractLocation = (filename) => {
+    // Priority patterns - check these first (most specific)
     const locationPatterns = [
+        // Direct location matches
         { pattern: /UrbanStreets/i, location: 'Urban Streets' },
-        { pattern: /Cafes?/i, location: 'Cafes' },
-        { pattern: /Studios?/i, location: 'Studios' },
+        { pattern: /UrbanNight/i, location: 'Urban Streets' },
+        { pattern: /Cafes?/i, location: 'Cafés' },
+        { pattern: /CafeScene/i, location: 'Cafés' },
+        { pattern: /CafeWindow/i, location: 'Cafés' },
+        { pattern: /Bar/i, location: 'Cafés' },
+        { pattern: /Matchbook/i, location: 'Cafés' },
+        { pattern: /Studios?/i, location: 'Creative Studios' },
+        { pattern: /StudioNatural/i, location: 'Creative Studios' },
+        { pattern: /StudioMood/i, location: 'Creative Studios' },
+        { pattern: /Workshop/i, location: 'Creative Studios' },
+        { pattern: /Keyboard/i, location: 'Creative Studios' },
+        { pattern: /Desk/i, location: 'Creative Studios' },
+        { pattern: /Flatlay/i, location: 'Creative Studios' },
+        { pattern: /Laydown/i, location: 'Creative Studios' },
         { pattern: /Rooftops?/i, location: 'Rooftops' },
+        { pattern: /Rooftop/i, location: 'Rooftops' },
+        { pattern: /Skyline/i, location: 'Rooftops' },
+        { pattern: /Silhouette/i, location: 'Rooftops' },
+        { pattern: /Sunset/i, location: 'Rooftops' },
+        { pattern: /CityView/i, location: 'Rooftops' },
+        { pattern: /V_HERO/i, location: 'Rooftops' },
+        { pattern: /V_LIFESTYLE/i, location: 'Rooftops' },
         { pattern: /Parks?/i, location: 'Parks' },
-        { pattern: /Matchbook/i, location: 'Product' },
-        { pattern: /BlackHoodie/i, location: 'Product' },
-        { pattern: /Bandana/i, location: 'Product' },
-        { pattern: /Collection/i, location: 'Product' },
-        { pattern: /TruckerHat/i, location: 'Product' },
-        { pattern: /GymTowel/i, location: 'Product' },
-        { pattern: /StickerPack/i, location: 'Product' },
-        { pattern: /Nalgene/i, location: 'Product' },
-        { pattern: /LeatherTote/i, location: 'Product' },
-        { pattern: /LeatherCap/i, location: 'Product' },
-        { pattern: /LeatherSet/i, location: 'Product' },
-        { pattern: /CanvasTote/i, location: 'Product' },
-        { pattern: /Socks/i, location: 'Product' },
-        { pattern: /MonochromeSocks/i, location: 'Product' },
-        { pattern: /BothTotes/i, location: 'Product' },
-        { pattern: /MM\d+_/i, location: 'Merch' },
-        { pattern: /V_HERO/i, location: 'Hero' },
-        { pattern: /V_HOODIE/i, location: 'Product' },
-        { pattern: /V_LIFESTYLE/i, location: 'Lifestyle' },
+        { pattern: /ParkBench/i, location: 'Parks' },
+        { pattern: /Nature/i, location: 'Parks' },
+        { pattern: /Grass/i, location: 'Parks' },
+        { pattern: /Natural/i, location: 'Parks' },
     ];
 
     for (const { pattern, location } of locationPatterns) {
@@ -393,11 +400,24 @@ const extractLocation = (filename) => {
             return location;
         }
     }
-    return 'Other';
+
+    // MM_ Merch series -> Creative Studios (product/lifestyle studio shots)
+    if (/MM\d+_/i.test(filename)) {
+        return 'Creative Studios';
+    }
+
+    // Product shots without clear location -> Creative Studios
+    // (Bandana, Collection, Socks, Totes, Hoodie, Hat, etc.)
+    if (/Bandana|Collection|Socks|Tote|Hoodie|Hat|Towel|Sticker|Nalgene|Leather|Canvas|Portrait|Close|Texture|Spread|Worn|Matching|Comparison|Contents|BackDetail/i.test(filename)) {
+        return 'Creative Studios';
+    }
+
+    // Default fallback
+    return 'Creative Studios';
 };
 
-// Get all unique locations from assets
-const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafes', 'Studios', 'Rooftops', 'Parks', 'Product', 'Merch', 'Hero', 'Lifestyle'];
+// Only 5 location categories
+const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafés', 'Creative Studios', 'Rooftops', 'Parks'];
 
 const getCustomAssets = () => {
     const imageFilenames = [
