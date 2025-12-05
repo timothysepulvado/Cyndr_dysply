@@ -653,7 +653,7 @@ export default function App() {
         const saved = localStorage.getItem('cylndr-removed-assets');
         return saved ? new Set(JSON.parse(saved)) : new Set();
     });
-    const [isEditMode, setIsEditMode] = useState(true);
+    const [isEditMode, setIsEditMode] = useState(false);
     const [exportCode, setExportCode] = useState(null); // For showing export modal
 
     // Save removed IDs to localStorage whenever they change
