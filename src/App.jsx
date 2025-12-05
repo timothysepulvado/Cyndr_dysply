@@ -361,7 +361,43 @@ const S3_BASE_URL = 'https://brandstudiosai-cylndr.s3.us-east-2.amazonaws.com';
 
 // Helper function to extract location from filename
 // Consolidates ALL assets into 5 categories: Urban Streets, Cafés, Creative Studios, Rooftops, Parks
+// Plus "Merch" category temporarily to identify MM_ series during curation
 const extractLocation = (filename) => {
+    // Specific MM_ assignments (user-defined)
+    // Parks (3)
+    if (/MM11_/i.test(filename)) return 'Parks';
+    if (/MM19_/i.test(filename)) return 'Parks';
+    if (/MM40_/i.test(filename)) return 'Parks';
+
+    // Urban Streets (need +3): subway, bike, alley vibes
+    if (/MM13_/i.test(filename)) return 'Urban Streets';  // Subway
+    if (/MM21_/i.test(filename)) return 'Urban Streets';  // Bike
+    if (/MM01_/i.test(filename)) return 'Urban Streets';  // Floor/street
+
+    // Rooftops (need +5): night/moody vibes
+    if (/MM41_/i.test(filename)) return 'Rooftops';  // Night edit
+    if (/MM44_/i.test(filename)) return 'Rooftops';  // Night drive
+    if (/MM18_/i.test(filename)) return 'Rooftops';  // Musician
+    if (/MM08_/i.test(filename)) return 'Rooftops';  // Creator
+    if (/MM04_/i.test(filename)) return 'Rooftops';  // Edit suite
+
+    // Creative Studios (rest go here)
+    if (/MM27_/i.test(filename)) return 'Creative Studios';
+    if (/MM42_/i.test(filename)) return 'Creative Studios';
+    if (/MM02_/i.test(filename)) return 'Creative Studios';
+    if (/MM03_/i.test(filename)) return 'Creative Studios';
+    if (/MM07_/i.test(filename)) return 'Creative Studios';
+    if (/MM12_/i.test(filename)) return 'Creative Studios';
+    if (/MM17_/i.test(filename)) return 'Creative Studios';
+    if (/MM22_/i.test(filename)) return 'Creative Studios';
+    if (/MM24_/i.test(filename)) return 'Creative Studios';
+    if (/MM43_/i.test(filename)) return 'Creative Studios';
+
+    // Remaining MM_ Merch series -> Separate "Merch" category for easy identification
+    if (/MM\d+_/i.test(filename)) {
+        return 'Merch';
+    }
+
     // Priority patterns - check these first (most specific)
     const locationPatterns = [
         // Direct location matches
@@ -401,11 +437,6 @@ const extractLocation = (filename) => {
         }
     }
 
-    // MM_ Merch series -> Creative Studios (product/lifestyle studio shots)
-    if (/MM\d+_/i.test(filename)) {
-        return 'Creative Studios';
-    }
-
     // Product shots without clear location -> Creative Studios
     // (Bandana, Collection, Socks, Totes, Hoodie, Hat, etc.)
     if (/Bandana|Collection|Socks|Tote|Hoodie|Hat|Towel|Sticker|Nalgene|Leather|Canvas|Portrait|Close|Texture|Spread|Worn|Matching|Comparison|Contents|BackDetail/i.test(filename)) {
@@ -416,8 +447,8 @@ const extractLocation = (filename) => {
     return 'Creative Studios';
 };
 
-// Only 5 location categories
-const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafés', 'Creative Studios', 'Rooftops', 'Parks'];
+// Location categories (Merch is separate for curation visibility)
+const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafés', 'Creative Studios', 'Rooftops', 'Parks', 'Merch'];
 
 const getCustomAssets = () => {
     const imageFilenames = [
