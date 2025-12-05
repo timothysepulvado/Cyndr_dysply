@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Play, X, Aperture, Clock, Download, Share2, Activity, Maximize2, Grid, Hexagon, Zap, Layers, Box } from 'lucide-react';
+import { Play, X, Aperture, Clock, Download, Share2, Activity, Maximize2, Grid, Hexagon, Zap, Layers, Box, Trash2, Save, Edit3 } from 'lucide-react';
 
 /**
  * CYLNDR DESIGN SYSTEM V3 (CREDS DECK ALIGNMENT)
@@ -119,7 +119,7 @@ const Header = ({ activePillar, setActivePillar }) => {
     );
 };
 
-const AssetCard = ({ asset, onClick, themeColor, isDark }) => {
+const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark }) => {
     return (
         <div
             className="group break-inside-avoid mb-4 cursor-pointer"
@@ -158,6 +158,20 @@ const AssetCard = ({ asset, onClick, themeColor, isDark }) => {
                             {asset.type === 'video' ? <Play className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
                         </div>
                     </div>
+
+                    {/* Edit Mode: Remove Button */}
+                    {isEditMode && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onRemove(asset.id);
+                            }}
+                            className="absolute top-3 left-3 z-30 p-2 bg-red-600 text-white hover:bg-red-700 transition-colors shadow-lg border-2 border-white"
+                            title="Remove Asset"
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
 
                 {/* Info Panel */}
@@ -238,8 +252,8 @@ const DetailView = ({ asset, onClose }) => {
                                 <p className="text-xl font-black">2025</p>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-headline text-carbon/50 uppercase tracking-widest mb-1">Region</label>
-                                <p className="text-xl font-black">GLOBAL</p>
+                                <label className="block text-[10px] font-headline text-carbon/50 uppercase tracking-widest mb-1">Brand Grade</label>
+                                <p className="text-xl font-black">{asset.score}%</p>
                             </div>
                         </div>
 
@@ -321,36 +335,164 @@ const generateRandomAssets = (count = 100) => {
 };
 
 // Custom Assets (Placeholders for AWS S3 URLs)
+const S3_BASE_URL = 'https://brandstudiosai-cylndr.s3.us-east-2.amazonaws.com';
+
 const getCustomAssets = () => {
     // TODO: Replace these with actual AWS S3 URLs provided by user
-    const imageUrls = [
-        // Paste Image URLs here
+    const imageFilenames = [
+        'MM01_Product_LeatherTote_Floor_4k.png', 'MM02_Product_LeatherCap_Cafe_4k.png', 'MM03_Product_Hoodie_CinemaChair_4k.png', 'MM04_Product_Tee_EditSuite_4k.png', 'MM05_Product_Socks_Rooftop_4k.png', 'MM06_Life_Tote_Director_4k.png', 'MM07_Life_Cap_Editor_4k.png', 'MM08_Life_Hoodie_Creator_4k.png', 'MM09_Life_Tee_Gaffer_4k.png', 'MM10_Life_Socks_Dancer_4k.png', 'MM11_Product_LeatherCap_Doorknob_4k.png', 'MM12_Product_BlackTee_Chair_4k.png', 'MM13_Product_LeatherTote_Subway_4k.png', 'MM14_Product_Socks_UnderBed_4k.png', 'MM15_Product_Hoodie_TextureClose_4k.png', 'MM16_Life_Tee_Photographer_4k.png', 'MM17_Life_Tote_Designer_4k.png', 'MM18_Life_Hoodie_Musician_4k.png', 'MM19_Life_Socks_Skater_4k.png', 'MM20_Life_Cap_Writer_4k.png', 'MM21_Product_BlackTee_Bike_4k.png', 'MM22_Product_LeatherTote_ParkBench_4k.png', 'MM23_Product_Hoodie_VintageCar_4k.png', 'MM24_Product_LeatherCap_Amp_4k.png', 'MM25_Product_Socks_LaundryLine_4k.png', 'MM26_Life_Tote_Chef_4k.png', 'MM27_Life_Tee_Painter_4k.png', 'MM28_Life_Hoodie_SoundEngineer_4k.png', 'MM29_Life_Socks_Yoga_4k.png', 'MM30_Life_Cap_Carpenter_4k.png', 'MM31_Product_CombustionTee_Drums_4k.png', 'MM32_Product_TruckerHat_Rearview_4k.png', 'MM33_Product_GymTowel_Boxing_4k.png', 'MM34_Product_Stickers_Laptop_4k.png', 'MM35_Product_Nalgene_Nature_4k.png', 'MM36_Life_CylndrsTee_Mechanic_4k.png', 'MM37_Life_ChinatownTee_Foodie_4k.png', 'MM40_Life_TruckerHat_Landscaper_4k.png', 'MM41_Life_Hoodie_NightEdit_4k.png', 'MM42_Life_PrescriptionTee_Alley_4k.png', 'MM43_Product_Matchbooks_Bar_4k.png', 'MM44_Product_Hat_NightDrive_4k.png', 'MM45_Life_CombustionTee_Rooftop_4k.png', 'S01_UrbanStreets_GreenHoodie_4x5.png', 'S02_UrbanStreets_GreenHat_4x5.png', 'S03_UrbanStreets_HoodieBackPrint_4x5.png', 'S04_UrbanStreets_ToteStreetScene_16x9.png', 'S05_UrbanStreets_MFGTee_16x9.png', 'S06_UrbanStreets_ContentMachineTee_16x9.png', 'S07_UrbanStreets_MeltingPotTee_9x16.png', 'S08_UrbanStreets_ChinatownTee_9x16.png', 'S09_UrbanStreets_YellowSocks_9x16.png', 'S10_UrbanStreets_GreenCardigan_9x16.png', 'S11_Cafes_GreenHoodie_4x5.png', 'S12_Cafes_NalgeneTable_4x5.png', 'S13_Cafes_MindElixirTee_4x5.png', 'S14_Cafes_ToteLaptop_16x9.png', 'S15_Cafes_BlackDevineTee_16x9.png', 'S16_Cafes_CoolShitTee_9x16.png', 'S17_Cafes_GreenHat_9x16.png', 'S18_Cafes_GreenSocks_9x16.png', 'S19_FIX_GreenHoodie_WoodLaydown_4x5.png', 'S19_Studios_GreenHoodie_Laydown_4x5.png', 'S20_Studios_AllCylndrsTee_4x5.png', 'S21_Studios_NalgeneDesk_4x5.png', 'S22_Studios_CombustionTee_4x5.png', 'S23_Studios_ToteFlatlay_16x9.png', 'S24_Studios_MFGTee_16x9.png', 'S25_Studios_GreenHatFlatlay_16x9.png', 'S26_Studios_HoodieSleeveKeyboard_16x9.png', 'S27_Studios_GreenCardigan_9x16.png', 'S28_Studios_PrescriptionTee_Laydown_9x16.png', 'S29_Studios_OrangeSocks_9x16.png', 'S30_Studios_EngineBlockTee_Laydown_9x16.png', 'S31_Rooftops_HoodieSilhouette_4x5.png', 'S32_Rooftops_GreenHat_4x5.png', 'S33_Rooftops_SocksSkyline_4x5.png', 'S34_Rooftops_ToteOnLedge_16x9.png', 'S35_Rooftops_BlackDevineTee_16x9.png', 'S36_Rooftops_ContentMachineTee_16x9.png', 'S37_Rooftops_MeltingPotTee_9x16.png', 'S38_Rooftops_ChinatownTee_9x16.png', 'S39_Rooftops_NalgeneCityView_9x16.png', 'S40_Parks_CanvasTote_4x5.png', 'S41_Parks_GreenCardigan_4x5.png', 'S42_Parks_GymTowel_16x9.png', 'S43_Parks_MindElixirTee_16x9.png', 'S44_Parks_GreenHat_9x16.png', 'S45_Parks_CoolShitTee_9x16.png', 'S46_UrbanStreets_LeatherTote_4x5.png', 'S47_UrbanStreets_LeatherToteTexture_16x9.png', 'S48_UrbanStreets_LeatherCap_9x16.png', 'S49_UrbanStreets_LeatherToteCapCombo_9x16.png', 'S50_Cafes_LeatherToteTable_4x5.png', 'S51_Cafes_MonochromeSocks_16x9.png', 'S52_Studios_FullLeatherSet_4x5.png', 'S53_Studios_LeatherToteChair_16x9.png', 'S54_Studios_LeatherCapCloseup_16x9.png', 'S55_Studios_LeatherToteDesk_9x16.png', 'S56_Rooftops_LeatherToteSilhouette_4x5.png', 'S57_Rooftops_LeatherPiecesDramatic_16x9.png', 'S58_Rooftops_LeatherCapSkyline_9x16.png', 'S59_Parks_LeatherToteNatural_4x5.png', 'S60_Parks_MonochromeSocksGrass_16x9.png', 'S61_Matchbook_MacroStrike_16x9.png', 'S62_Matchbook_BarSetting_4x5.png', 'S63_Matchbook_SmokeArt_9x16.png', 'S64_Matchbook_CollectionSpread_16x9.png', 'S65_Matchbook_HandStrike_4x5.png', 'S66_BlackHoodie_FrontClose_4x5.png', 'S66_FIX_BlackHoodie_WindowLight_4x5.png', 'S67_BlackHoodie_BackDetail_16x9.png', 'S68_BlackHoodie_UrbanNight_9x16.png', 'S68_FIX_BlackHoodie_GoldenHour_9x16.png', 'S69_BlackHoodie_StudioMood_4x5.png', 'S69_FIX_BlackHoodie_StudioNatural_4x5.png', 'S70_BlackHoodie_Portrait_4x5.png', 'S71_Bandana_ProductFlat_4x5.png', 'S72_Bandana_NeckStyle_9x16.png', 'S73_Bandana_HeadWrap_4x5.png', 'S74_Bandana_Collection_16x9.png', 'S75_Bandana_TextureClose_16x9.png', 'S76_Collection_FlatLay_16x9.png', 'S77_TruckerHat_CloseUp_4x5.png', 'S78_GymTowel_Lifestyle_4x5.png', 'S79_StickerPack_Spread_16x9.png', 'S80_Nalgene_Lifestyle_9x16.png', 'S81_LeatherTote_WornPatina_4x5.png', 'S82_LeatherTote_BeingCarried_9x16.png', 'S83_LeatherCap_WornClose_16x9.png', 'S84_LeatherSet_Matching_4x5.png', 'S85_CanvasTote_InUse_9x16.png', 'S86_Socks_WithSkirt_4x5.png', 'S87_Socks_GreenWithShorts_9x16.png', 'S88_Socks_OrangeActionShot_16x9.png', 'S89_CanvasTote_WornSoft_4x5.png', 'S90_LeatherTote_CafeScene_16x9.png', 'S91_MonochromeSocks_Platform_4x5.png', 'S92_LeatherCap_BeingWorn_9x16.png', 'S93_BothTotes_Comparison_16x9.png', 'S94_Socks_AllColors_Worn_4x5.png', 'S95_LeatherTote_Contents_16x9.png', 'S96_BlackHoodie_CafeWindow_16x9.png', 'S97_BlackHoodie_WorkshopProfile_9x16.png', 'S98_BlackHoodie_BackDetail_Moody_16x9.png'
     ];
 
     const videoUrls = [
-        // Paste Video URLs here
+        `${S3_BASE_URL}/NEW_V01_UrbanStreets_GreenHoodie_16x9.mp4`,
+        `${S3_BASE_URL}/NEW_V02_UrbanStreets_BlackMFGTee_16x9_part1.mp4`,
+        `${S3_BASE_URL}/NEW_V02_UrbanStreets_BlackMFGTee_16x9_part2.mp4`,
+        `${S3_BASE_URL}/NEW_V03_UrbanStreets_GreenHat_16x9.mp4`,
+        `${S3_BASE_URL}/NEW_V04_UrbanStreets_CanvasTote_16x9_part1.mp4`,
+        `${S3_BASE_URL}/NEW_V04_UrbanStreets_CanvasTote_16x9_part2.mp4`,
+        `${S3_BASE_URL}/NEW_V05_UrbanStreets_CreamContentTee_9x16.mp4`,
+        `${S3_BASE_URL}/NEW_V06_UrbanStreets_BlackDevineTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/NEW_V06_UrbanStreets_BlackDevineTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/NEW_V07_UrbanStreets_YellowSocks_9x16.mp4`,
+        `${S3_BASE_URL}/NEW_V08_UrbanStreets_ChinatownTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/NEW_V08_UrbanStreets_ChinatownTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/NEW_V09_Cafes_GreenCardigan_16x9.mp4`,
+        `${S3_BASE_URL}/NEW_V10_Cafes_ToteNalgene_16x9_part1.mp4`,
+        `${S3_BASE_URL}/NEW_V10_Cafes_ToteNalgene_16x9_part2.mp4`,
+        `${S3_BASE_URL}/NEW_V11_Cafes_MeltingPotTee_16x9_part1.mp4`,
+        `${S3_BASE_URL}/NEW_V11_Cafes_MeltingPotTee_16x9_part2.mp4`,
+        `${S3_BASE_URL}/NEW_V12_Cafes_MindElixirTee_9x16.mp4`,
+        `${S3_BASE_URL}/NEW_V13_Cafes_GreenSocks_9x16.mp4`,
+        `${S3_BASE_URL}/NEW_V14_Studios_GreenHoodie_16x9.mp4`,
+        `${S3_BASE_URL}/NEW_V15_Studios_AllCylndrsTee_16x9.mp4`,
+        `${S3_BASE_URL}/NEW_V16_Studios_GreenHat_16x9.mp4`,
+        `${S3_BASE_URL}/NEW_V17_Studios_ToteOnChair_9x16.mp4`,
+        `${S3_BASE_URL}/NEW_V18_Studios_CombustionTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/NEW_V18_Studios_CombustionTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V01_FIX_UrbanStreets_GreenHoodie_16x9.mp4`,
+        `${S3_BASE_URL}/V01_UrbanStreets_GreenHoodie_16x9.mp4`,
+        `${S3_BASE_URL}/V01_UrbanStreets_GreenHoodie_CINE_16x9.mp4`,
+        `${S3_BASE_URL}/V02_UrbanStreets_BlackMFGTee_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V02_UrbanStreets_BlackMFGTee_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V03_UrbanStreets_GreenHat_16x9.mp4`,
+        `${S3_BASE_URL}/V04_UrbanStreets_CanvasTote_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V04_UrbanStreets_CanvasTote_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V04_UrbanStreets_CanvasTote_CINE_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V04_UrbanStreets_CanvasTote_CINE_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V05_UrbanStreets_CreamContentTee_9x16.mp4`,
+        `${S3_BASE_URL}/V06_UrbanStreets_BlackDevineTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V06_UrbanStreets_BlackDevineTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V07_FIX2_UrbanStreets_YellowSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V07_FIX_UrbanStreets_YellowSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V07_UrbanStreets_YellowSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V08_UrbanStreets_ChinatownTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V08_UrbanStreets_ChinatownTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V08_UrbanStreets_ChinatownTee_CINE_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V09_Cafes_GreenCardigan_16x9.mp4`,
+        `${S3_BASE_URL}/V09_Cafes_GreenCardigan_CINE_16x9.mp4`,
+        `${S3_BASE_URL}/V09_FIX_Cafes_GreenCardigan_16x9.mp4`,
+        `${S3_BASE_URL}/V10_Cafes_ToteNalgene_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V10_Cafes_ToteNalgene_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V10_Cafes_ToteNalgene_CINE_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V10_Cafes_ToteNalgene_CINE_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V11_Cafes_MeltingPotTee_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V11_Cafes_MeltingPotTee_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V12_Cafes_MindElixirTee_9x16.mp4`,
+        `${S3_BASE_URL}/V13_Cafes_GreenSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V13_FIX2_Cafes_GreenSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V13_FIX_Cafes_GreenSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V14_Studios_GreenHoodie_16x9.mp4`,
+        `${S3_BASE_URL}/V15_FIX_Studios_AllCylndrsTee_16x9.mp4`,
+        `${S3_BASE_URL}/V15_Studios_AllCylndrsTee_16x9.mp4`,
+        `${S3_BASE_URL}/V15_Studios_AllCylndrsTee_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V15_Studios_AllCylndrsTee_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V15_Studios_AllCylndrsTee_CINE_16x9.mp4`,
+        `${S3_BASE_URL}/V16_Studios_GreenHat_16x9.mp4`,
+        `${S3_BASE_URL}/V16_Studios_GreenHat_CINE_16x9.mp4`,
+        `${S3_BASE_URL}/V17_Studios_ToteOnChair_9x16.mp4`,
+        `${S3_BASE_URL}/V18_Studios_CombustionTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V18_Studios_CombustionTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V18_Studios_CombustionTee_CINE_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V18_Studios_CombustionTee_CINE_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V19_Studios_NalgeneDesk_9x16.mp4`,
+        `${S3_BASE_URL}/V19_Studios_NalgeneDesk_FIX_16x9.mp4`,
+        `${S3_BASE_URL}/V20_Studios_MFGTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V20_Studios_MFGTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V21_FIX_Rooftops_GreenHoodie_16x9.mp4`,
+        `${S3_BASE_URL}/V21_Rooftops_GreenHoodie_16x9.mp4`,
+        `${S3_BASE_URL}/V22_Rooftops_EngineBlockTee_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V22_Rooftops_EngineBlockTee_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V23_Rooftops_GreenHat_16x9.mp4`,
+        `${S3_BASE_URL}/V23_Rooftops_GreenHat_CINE_16x9.mp4`,
+        `${S3_BASE_URL}/V24_Rooftops_OrangeSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V25_Rooftops_CoolShitTee_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V25_Rooftops_CoolShitTee_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V25_Rooftops_CoolShitTee_CINE_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V26_Rooftops_CanvasTote_9x16.mp4`,
+        `${S3_BASE_URL}/V26_Rooftops_CanvasTote_CINE_9x16.mp4`,
+        `${S3_BASE_URL}/V27_Parks_CanvasTote_16x9.mp4`,
+        `${S3_BASE_URL}/V28_FIX2_Parks_GreenCardigan_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V28_FIX_Parks_GreenCardigan_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V28_Parks_GreenCardigan_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V28_Parks_GreenCardigan_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V29_Parks_PrescriptionTee_9x16.mp4`,
+        `${S3_BASE_URL}/V29_Parks_PrescriptionTee_CINE_9x16.mp4`,
+        `${S3_BASE_URL}/V30_Parks_HatTote_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V30_Parks_HatTote_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V31_UrbanStreets_LeatherTote_16x9.mp4`,
+        `${S3_BASE_URL}/V31_UrbanStreets_LeatherTote_CINE_16x9.mp4`,
+        `${S3_BASE_URL}/V32_UrbanStreets_LeatherCap_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V32_UrbanStreets_LeatherCap_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V32_UrbanStreets_LeatherCap_CINE_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V33_Cafes_LeatherToteSocks_9x16_part1.mp4`,
+        `${S3_BASE_URL}/V33_Cafes_LeatherToteSocks_9x16_part2.mp4`,
+        `${S3_BASE_URL}/V34_Studios_FullLeatherSet_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V34_Studios_FullLeatherSet_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V34_Studios_FullLeatherSet_CINE_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V35_Studios_LeatherCapDetail_9x16.mp4`,
+        `${S3_BASE_URL}/V35_Studios_LeatherCapDetail_CINE_9x16.mp4`,
+        `${S3_BASE_URL}/V36_Studios_LeatherToteDesk_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V36_Studios_LeatherToteDesk_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V36_Studios_LeatherToteDesk_CINE_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V36_Studios_LeatherToteDesk_CINE_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V37_Rooftops_LeatherToteSilhouette_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V37_Rooftops_LeatherToteSilhouette_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V38_Rooftops_LeatherCapHero_9x16.mp4`,
+        `${S3_BASE_URL}/V39_Parks_LeatherToteLifestyle_16x9_part1.mp4`,
+        `${S3_BASE_URL}/V39_Parks_LeatherToteLifestyle_16x9_part2.mp4`,
+        `${S3_BASE_URL}/V40_Parks_MonochromeSocks_9x16.mp4`,
+        `${S3_BASE_URL}/V40_Rooftops_NalgeneSunset_FIX_16x9.mp4`,
+        `${S3_BASE_URL}/V_HERO_HoodieDramatic_16x9.mp4`,
+        `${S3_BASE_URL}/V_HERO_SocksDramatic_9x16.mp4`,
+        `${S3_BASE_URL}/V_HERO_SocksDramatic_v2_9x16.mp4`,
+        `${S3_BASE_URL}/V_HOODIE_BackDetail_16x9.mp4`,
+        `${S3_BASE_URL}/V_LIFESTYLE_RooftopSunset_16x9.mp4`,
+        `${S3_BASE_URL}/V_LIFESTYLE_Rooftop_Closeup_16x9.mp4`,
+        `${S3_BASE_URL}/V_LIFESTYLE_Rooftop_v2_16x9.mp4`,
     ];
 
-    const customImages = imageUrls.map((url, i) => ({
+    const customImages = imageFilenames.map((filename, i) => ({
         id: `custom-image-${i}`,
         type: 'image',
-        url: url, // Use actual URL
+        url: `${S3_BASE_URL}/${filename}`,
         title: 'Merch // Cylndr x Brandstudios.Ai',
         client: 'Merch // Cylndr x Brandstudios.Ai',
-        pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)], // Random pillar for variety? Or specific?
-        score: Math.floor(Math.random() * 10) + 90, // 90-99%
-        isCustom: true
+        pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)],
+        score: Math.floor(Math.random() * 10) + 90,
+        isCustom: true,
+        tags: ['Merch', 'Digital', 'Social', 'Campaign'].sort(() => 0.5 - Math.random()).slice(0, 2)
     }));
 
     const customVideos = videoUrls.map((url, i) => ({
         id: `custom-video-${i}`,
         type: 'video',
-        url: url, // Use actual URL
+        url: url,
         title: 'Merch // Cylndr x Brandstudios.Ai',
         client: 'Merch // Cylndr x Brandstudios.Ai',
         pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)],
-        score: Math.floor(Math.random() * 10) + 90, // 90-99%
-        isCustom: true
+        score: Math.floor(Math.random() * 10) + 90,
+        isCustom: true,
+        tags: ['Motion', 'Digital', 'Social', 'Campaign'].sort(() => 0.5 - Math.random()).slice(0, 2)
     }));
 
     return [...customImages, ...customVideos];
@@ -360,6 +502,10 @@ const getCustomAssets = () => {
 export default function App() {
     const [activePillar, setActivePillar] = useState('ALL');
     const [selectedAsset, setSelectedAsset] = useState(null);
+
+    // Curation State
+    const [removedIds, setRemovedIds] = useState(new Set());
+    const [isEditMode, setIsEditMode] = useState(true);
 
     // Memoize assets
     const randomAssets = useMemo(() => generateRandomAssets(60), []); // Reduced count since we'll add custom ones
@@ -378,19 +524,36 @@ export default function App() {
 
     // Filtering Logic
     const displayedAssets = useMemo(() => {
-        if (activePillar === 'ALL') {
-            return allAssets; // Mixed Random + Custom
-        }
+        let filtered = allAssets;
+
         if (activePillar === 'IMAGES') {
-            // ONLY Custom Images
-            return customAssets.filter(a => a.type === 'image');
+            filtered = customAssets.filter(a => a.type === 'image');
+        } else if (activePillar === 'VIDEOS') {
+            filtered = customAssets.filter(a => a.type === 'video');
         }
-        if (activePillar === 'VIDEOS') {
-            // ONLY Custom Videos
-            return customAssets.filter(a => a.type === 'video');
-        }
-        return allAssets;
-    }, [activePillar, allAssets, customAssets]);
+
+        // Filter out removed assets
+        return filtered.filter(asset => !removedIds.has(asset.id));
+    }, [activePillar, allAssets, customAssets, removedIds]);
+
+    const handleRemove = (id) => {
+        setRemovedIds(prev => {
+            const next = new Set(prev);
+            next.add(id);
+            return next;
+        });
+    };
+
+    const handleExport = () => {
+        const keptAssets = customAssets.filter(a => !removedIds.has(a.id));
+        const keptImages = keptAssets.filter(a => a.type === 'image').map(a => a.url);
+        const keptVideos = keptAssets.filter(a => a.type === 'video').map(a => a.url);
+
+        console.log('--- KEPT ASSETS ---');
+        console.log('IMAGES:', JSON.stringify(keptImages));
+        console.log('VIDEOS:', JSON.stringify(keptVideos));
+        alert('Asset lists exported to Console. Copy them to update the code.');
+    };
 
     // Derive current theme colors based on selection
     const currentTheme = THEMES[activePillar];
@@ -450,6 +613,8 @@ export default function App() {
                                 key={asset.id}
                                 asset={asset}
                                 onClick={setSelectedAsset}
+                                onRemove={handleRemove}
+                                isEditMode={isEditMode}
                                 themeColor={THEMES[asset.pillar].color}
                                 isDark={activePillar === 'ALL'}
                             />
@@ -470,6 +635,25 @@ export default function App() {
                 asset={selectedAsset}
                 onClose={() => setSelectedAsset(null)}
             />
+
+            {/* CURATION CONTROLS */}
+            <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
+                <button
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    className={`flex items-center gap-2 px-4 py-3 font-bold uppercase tracking-widest shadow-xl transition-all ${isEditMode ? 'bg-carbon text-white border-2 border-white' : 'bg-white text-carbon border-2 border-carbon'}`}
+                >
+                    <Edit3 className="w-4 h-4" /> {isEditMode ? 'Done Editing' : 'Edit Mode'}
+                </button>
+
+                {isEditMode && (
+                    <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 px-4 py-3 bg-oxidized-green text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-green-700 transition-colors"
+                    >
+                        <Save className="w-4 h-4" /> Export List
+                    </button>
+                )}
+            </div>
         </div>
     );
 }
