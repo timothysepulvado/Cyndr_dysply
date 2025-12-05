@@ -321,12 +321,14 @@ const Footer = () => (
                     Modern Content, <span className="text-carbon/50">Powered by Design.</span>
                 </p>
             </div>
-            <div className="flex flex-col justify-between items-start md:items-end">
+            {/*
+                <div className="flex flex-col justify-between items-start md:items-end">
                 <div className="w-16 h-16 border-2 border-white rounded-full flex items-center justify-center mb-4">
                     <span className="font-serif italic text-2xl">C</span>
                 </div>
                 <span className="text-[10px] font-headline text-carbon/50">© 2025 CYLNDR STUDIOS</span>
             </div>
+            */}
         </div>
     </footer>
 );
