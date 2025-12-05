@@ -359,8 +359,47 @@ const generateRandomAssets = (count = 100) => {
 // Custom Assets (Placeholders for AWS S3 URLs)
 const S3_BASE_URL = 'https://brandstudiosai-cylndr.s3.us-east-2.amazonaws.com';
 
+// Helper function to extract location from filename
+const extractLocation = (filename) => {
+    const locationPatterns = [
+        { pattern: /UrbanStreets/i, location: 'Urban Streets' },
+        { pattern: /Cafes?/i, location: 'Cafes' },
+        { pattern: /Studios?/i, location: 'Studios' },
+        { pattern: /Rooftops?/i, location: 'Rooftops' },
+        { pattern: /Parks?/i, location: 'Parks' },
+        { pattern: /Matchbook/i, location: 'Product' },
+        { pattern: /BlackHoodie/i, location: 'Product' },
+        { pattern: /Bandana/i, location: 'Product' },
+        { pattern: /Collection/i, location: 'Product' },
+        { pattern: /TruckerHat/i, location: 'Product' },
+        { pattern: /GymTowel/i, location: 'Product' },
+        { pattern: /StickerPack/i, location: 'Product' },
+        { pattern: /Nalgene/i, location: 'Product' },
+        { pattern: /LeatherTote/i, location: 'Product' },
+        { pattern: /LeatherCap/i, location: 'Product' },
+        { pattern: /LeatherSet/i, location: 'Product' },
+        { pattern: /CanvasTote/i, location: 'Product' },
+        { pattern: /Socks/i, location: 'Product' },
+        { pattern: /MonochromeSocks/i, location: 'Product' },
+        { pattern: /BothTotes/i, location: 'Product' },
+        { pattern: /MM\d+_/i, location: 'Merch' },
+        { pattern: /V_HERO/i, location: 'Hero' },
+        { pattern: /V_HOODIE/i, location: 'Product' },
+        { pattern: /V_LIFESTYLE/i, location: 'Lifestyle' },
+    ];
+
+    for (const { pattern, location } of locationPatterns) {
+        if (pattern.test(filename)) {
+            return location;
+        }
+    }
+    return 'Other';
+};
+
+// Get all unique locations from assets
+const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafes', 'Studios', 'Rooftops', 'Parks', 'Product', 'Merch', 'Hero', 'Lifestyle'];
+
 const getCustomAssets = () => {
-    // TODO: Replace these with actual AWS S3 URLs provided by user
     const imageFilenames = [
         'MM01_Product_LeatherTote_Floor_4k.png', 'MM02_Product_LeatherCap_Cafe_4k.png', 'MM03_Product_Hoodie_CinemaChair_4k.png', 'MM04_Product_Tee_EditSuite_4k.png', 'MM05_Product_Socks_Rooftop_4k.png', 'MM06_Life_Tote_Director_4k.png', 'MM07_Life_Cap_Editor_4k.png', 'MM08_Life_Hoodie_Creator_4k.png', 'MM09_Life_Tee_Gaffer_4k.png', 'MM10_Life_Socks_Dancer_4k.png', 'MM11_Product_LeatherCap_Doorknob_4k.png', 'MM12_Product_BlackTee_Chair_4k.png', 'MM13_Product_LeatherTote_Subway_4k.png', 'MM14_Product_Socks_UnderBed_4k.png', 'MM15_Product_Hoodie_TextureClose_4k.png', 'MM16_Life_Tee_Photographer_4k.png', 'MM17_Life_Tote_Designer_4k.png', 'MM18_Life_Hoodie_Musician_4k.png', 'MM19_Life_Socks_Skater_4k.png', 'MM20_Life_Cap_Writer_4k.png', 'MM21_Product_BlackTee_Bike_4k.png', 'MM22_Product_LeatherTote_ParkBench_4k.png', 'MM23_Product_Hoodie_VintageCar_4k.png', 'MM24_Product_LeatherCap_Amp_4k.png', 'MM25_Product_Socks_LaundryLine_4k.png', 'MM26_Life_Tote_Chef_4k.png', 'MM27_Life_Tee_Painter_4k.png', 'MM28_Life_Hoodie_SoundEngineer_4k.png', 'MM29_Life_Socks_Yoga_4k.png', 'MM30_Life_Cap_Carpenter_4k.png', 'MM31_Product_CombustionTee_Drums_4k.png', 'MM32_Product_TruckerHat_Rearview_4k.png', 'MM33_Product_GymTowel_Boxing_4k.png', 'MM34_Product_Stickers_Laptop_4k.png', 'MM35_Product_Nalgene_Nature_4k.png', 'MM36_Life_CylndrsTee_Mechanic_4k.png', 'MM37_Life_ChinatownTee_Foodie_4k.png', 'MM40_Life_TruckerHat_Landscaper_4k.png', 'MM41_Life_Hoodie_NightEdit_4k.png', 'MM42_Life_PrescriptionTee_Alley_4k.png', 'MM43_Product_Matchbooks_Bar_4k.png', 'MM44_Product_Hat_NightDrive_4k.png', 'MM45_Life_CombustionTee_Rooftop_4k.png', 'S01_UrbanStreets_GreenHoodie_4x5.png', 'S02_UrbanStreets_GreenHat_4x5.png', 'S03_UrbanStreets_HoodieBackPrint_4x5.png', 'S04_UrbanStreets_ToteStreetScene_16x9.png', 'S05_UrbanStreets_MFGTee_16x9.png', 'S06_UrbanStreets_ContentMachineTee_16x9.png', 'S07_UrbanStreets_MeltingPotTee_9x16.png', 'S08_UrbanStreets_ChinatownTee_9x16.png', 'S09_UrbanStreets_YellowSocks_9x16.png', 'S10_UrbanStreets_GreenCardigan_9x16.png', 'S11_Cafes_GreenHoodie_4x5.png', 'S12_Cafes_NalgeneTable_4x5.png', 'S13_Cafes_MindElixirTee_4x5.png', 'S14_Cafes_ToteLaptop_16x9.png', 'S15_Cafes_BlackDevineTee_16x9.png', 'S16_Cafes_CoolShitTee_9x16.png', 'S17_Cafes_GreenHat_9x16.png', 'S18_Cafes_GreenSocks_9x16.png', 'S19_FIX_GreenHoodie_WoodLaydown_4x5.png', 'S19_Studios_GreenHoodie_Laydown_4x5.png', 'S20_Studios_AllCylndrsTee_4x5.png', 'S21_Studios_NalgeneDesk_4x5.png', 'S22_Studios_CombustionTee_4x5.png', 'S23_Studios_ToteFlatlay_16x9.png', 'S24_Studios_MFGTee_16x9.png', 'S25_Studios_GreenHatFlatlay_16x9.png', 'S26_Studios_HoodieSleeveKeyboard_16x9.png', 'S27_Studios_GreenCardigan_9x16.png', 'S28_Studios_PrescriptionTee_Laydown_9x16.png', 'S29_Studios_OrangeSocks_9x16.png', 'S30_Studios_EngineBlockTee_Laydown_9x16.png', 'S31_Rooftops_HoodieSilhouette_4x5.png', 'S32_Rooftops_GreenHat_4x5.png', 'S33_Rooftops_SocksSkyline_4x5.png', 'S34_Rooftops_ToteOnLedge_16x9.png', 'S35_Rooftops_BlackDevineTee_16x9.png', 'S36_Rooftops_ContentMachineTee_16x9.png', 'S37_Rooftops_MeltingPotTee_9x16.png', 'S38_Rooftops_ChinatownTee_9x16.png', 'S39_Rooftops_NalgeneCityView_9x16.png', 'S40_Parks_CanvasTote_4x5.png', 'S41_Parks_GreenCardigan_4x5.png', 'S42_Parks_GymTowel_16x9.png', 'S43_Parks_MindElixirTee_16x9.png', 'S44_Parks_GreenHat_9x16.png', 'S45_Parks_CoolShitTee_9x16.png', 'S46_UrbanStreets_LeatherTote_4x5.png', 'S47_UrbanStreets_LeatherToteTexture_16x9.png', 'S48_UrbanStreets_LeatherCap_9x16.png', 'S49_UrbanStreets_LeatherToteCapCombo_9x16.png', 'S50_Cafes_LeatherToteTable_4x5.png', 'S51_Cafes_MonochromeSocks_16x9.png', 'S52_Studios_FullLeatherSet_4x5.png', 'S53_Studios_LeatherToteChair_16x9.png', 'S54_Studios_LeatherCapCloseup_16x9.png', 'S55_Studios_LeatherToteDesk_9x16.png', 'S56_Rooftops_LeatherToteSilhouette_4x5.png', 'S57_Rooftops_LeatherPiecesDramatic_16x9.png', 'S58_Rooftops_LeatherCapSkyline_9x16.png', 'S59_Parks_LeatherToteNatural_4x5.png', 'S60_Parks_MonochromeSocksGrass_16x9.png', 'S61_Matchbook_MacroStrike_16x9.png', 'S62_Matchbook_BarSetting_4x5.png', 'S63_Matchbook_SmokeArt_9x16.png', 'S64_Matchbook_CollectionSpread_16x9.png', 'S65_Matchbook_HandStrike_4x5.png', 'S66_BlackHoodie_FrontClose_4x5.png', 'S66_FIX_BlackHoodie_WindowLight_4x5.png', 'S67_BlackHoodie_BackDetail_16x9.png', 'S68_BlackHoodie_UrbanNight_9x16.png', 'S68_FIX_BlackHoodie_GoldenHour_9x16.png', 'S69_BlackHoodie_StudioMood_4x5.png', 'S69_FIX_BlackHoodie_StudioNatural_4x5.png', 'S70_BlackHoodie_Portrait_4x5.png', 'S71_Bandana_ProductFlat_4x5.png', 'S72_Bandana_NeckStyle_9x16.png', 'S73_Bandana_HeadWrap_4x5.png', 'S74_Bandana_Collection_16x9.png', 'S75_Bandana_TextureClose_16x9.png', 'S76_Collection_FlatLay_16x9.png', 'S77_TruckerHat_CloseUp_4x5.png', 'S78_GymTowel_Lifestyle_4x5.png', 'S79_StickerPack_Spread_16x9.png', 'S80_Nalgene_Lifestyle_9x16.png', 'S81_LeatherTote_WornPatina_4x5.png', 'S82_LeatherTote_BeingCarried_9x16.png', 'S83_LeatherCap_WornClose_16x9.png', 'S84_LeatherSet_Matching_4x5.png', 'S85_CanvasTote_InUse_9x16.png', 'S86_Socks_WithSkirt_4x5.png', 'S87_Socks_GreenWithShorts_9x16.png', 'S88_Socks_OrangeActionShot_16x9.png', 'S89_CanvasTote_WornSoft_4x5.png', 'S90_LeatherTote_CafeScene_16x9.png', 'S91_MonochromeSocks_Platform_4x5.png', 'S92_LeatherCap_BeingWorn_9x16.png', 'S93_BothTotes_Comparison_16x9.png', 'S94_Socks_AllColors_Worn_4x5.png', 'S95_LeatherTote_Contents_16x9.png', 'S96_BlackHoodie_CafeWindow_16x9.png', 'S97_BlackHoodie_WorkshopProfile_9x16.png', 'S98_BlackHoodie_BackDetail_Moody_16x9.png'
     ];
@@ -502,20 +541,25 @@ const getCustomAssets = () => {
         pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)],
         score: Math.floor(Math.random() * 10) + 90,
         isCustom: true,
+        location: extractLocation(filename),
         tags: ['Merch', 'Digital', 'Social', 'Campaign'].sort(() => 0.5 - Math.random()).slice(0, 2)
     }));
 
-    const customVideos = videoUrls.map((url, i) => ({
-        id: `custom-video-${i}`,
-        type: 'video',
-        url: url,
-        title: 'Merch // Cylndr x Brandstudios.Ai',
-        client: 'Merch // Cylndr x Brandstudios.Ai',
-        pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)],
-        score: Math.floor(Math.random() * 10) + 90,
-        isCustom: true,
-        tags: ['Motion', 'Digital', 'Social', 'Campaign'].sort(() => 0.5 - Math.random()).slice(0, 2)
-    }));
+    const customVideos = videoUrls.map((url, i) => {
+        const filename = url.substring(url.lastIndexOf('/') + 1);
+        return {
+            id: `custom-video-${i}`,
+            type: 'video',
+            url: url,
+            title: 'Merch // Cylndr x Brandstudios.Ai',
+            client: 'Merch // Cylndr x Brandstudios.Ai',
+            pillar: PILLARS[Math.floor(Math.random() * PILLARS.length)],
+            score: Math.floor(Math.random() * 10) + 90,
+            isCustom: true,
+            location: extractLocation(filename),
+            tags: ['Motion', 'Digital', 'Social', 'Campaign'].sort(() => 0.5 - Math.random()).slice(0, 2)
+        };
+    });
 
     return [...customImages, ...customVideos];
 };
@@ -524,13 +568,15 @@ const getCustomAssets = () => {
 export default function App() {
     const [activePillar, setActivePillar] = useState('ALL');
     const [selectedAsset, setSelectedAsset] = useState(null);
+    const [selectedLocation, setSelectedLocation] = useState('All'); // Location filter state
 
-    // Curation State - Load from localStorage on mount
+    // Curation State - Load from localStorage on mount (deletions persist across reloads)
     const [removedIds, setRemovedIds] = useState(() => {
         const saved = localStorage.getItem('cylndr-removed-assets');
         return saved ? new Set(JSON.parse(saved)) : new Set();
     });
     const [isEditMode, setIsEditMode] = useState(true);
+    const [exportCode, setExportCode] = useState(null); // For showing export modal
 
     // Save removed IDs to localStorage whenever they change
     useEffect(() => {
@@ -552,6 +598,11 @@ export default function App() {
         return combined;
     }, [randomAssets, customAssets]);
 
+    // Reset location filter when switching pillars
+    useEffect(() => {
+        setSelectedLocation('All');
+    }, [activePillar]);
+
     // Filtering Logic
     const displayedAssets = useMemo(() => {
         let filtered = allAssets;
@@ -562,9 +613,26 @@ export default function App() {
             filtered = customAssets.filter(a => a.type === 'video');
         }
 
+        // Apply location filter (only for IMAGES and VIDEOS views)
+        if ((activePillar === 'IMAGES' || activePillar === 'VIDEOS') && selectedLocation !== 'All') {
+            filtered = filtered.filter(asset => asset.location === selectedLocation);
+        }
+
         // Filter out removed assets
         return filtered.filter(asset => !removedIds.has(asset.id));
-    }, [activePillar, allAssets, customAssets, removedIds]);
+    }, [activePillar, allAssets, customAssets, removedIds, selectedLocation]);
+
+    // Get available locations for current view
+    const availableLocations = useMemo(() => {
+        if (activePillar !== 'IMAGES' && activePillar !== 'VIDEOS') return [];
+
+        const typeAssets = customAssets.filter(a =>
+            a.type === (activePillar === 'IMAGES' ? 'image' : 'video') &&
+            !removedIds.has(a.id)
+        );
+        const locations = [...new Set(typeAssets.map(a => a.location))].sort();
+        return ['All', ...locations];
+    }, [activePillar, customAssets, removedIds]);
 
     const handleRemove = (id) => {
         setRemovedIds(prev => {
@@ -586,20 +654,13 @@ export default function App() {
         });
 
         // Generate ready-to-paste code
-        const imageArrayCode = `const imageFilenames = [\n${keptImageFilenames.map(name => `        '${name}'`).join(',\n')}\n    ];`;
-        const videoArrayCode = `const videoUrls = [\n${keptVideos.map(url => `        '${url}'`).join(',\n')}\n    ];`;
+        const imageArrayCode = `const imageFilenames = [\n${keptImageFilenames.map(name => `    '${name}'`).join(',\n')}\n];`;
+        const videoArrayCode = `const videoUrls = [\n${keptVideos.map(url => `    '${url}'`).join(',\n')}\n];`;
 
-        console.clear();
-        console.log('=== COPY THIS CODE TO PERMANENTLY UPDATE App.jsx ===\n');
-        console.log('// Replace imageFilenames array (lines 342-344)');
-        console.log(imageArrayCode);
-        console.log('\n// Replace videoUrls array (lines 346-472)');
-        console.log(videoArrayCode);
-        console.log('\n=== STATS ===');
-        console.log(`Images - Kept: ${keptImageFilenames.length}, Removed: ${customAssets.filter(a => a.type === 'image').length - keptImageFilenames.length}`);
-        console.log(`Videos - Kept: ${keptVideos.length}, Removed: ${customAssets.filter(a => a.type === 'video').length - keptVideos.length}`);
+        const fullExportCode = `// ===== PASTE THIS INTO App.jsx =====\n\n// Replace imageFilenames array (around line 364):\n${imageArrayCode}\n\n// Replace videoUrls array (around line 368):\n${videoArrayCode}\n\n// === STATS ===\n// Images - Kept: ${keptImageFilenames.length}, Removed: ${customAssets.filter(a => a.type === 'image').length - keptImageFilenames.length}\n// Videos - Kept: ${keptVideos.length}, Removed: ${customAssets.filter(a => a.type === 'video').length - keptVideos.length}`;
 
-        alert(`✅ Export Complete!\n\nImages: ${keptImageFilenames.length} kept\nVideos: ${keptVideos.length} kept\n\nCode copied to console - paste both arrays into App.jsx to make changes permanent.`);
+        // Show in modal
+        setExportCode(fullExportCode);
     };
 
     const handleReset = () => {
@@ -661,6 +722,43 @@ export default function App() {
                         ))}
                     </div>
 
+                    {/* Location Category Tabs - Only show on IMAGES and VIDEOS pages */}
+                    {(activePillar === 'IMAGES' || activePillar === 'VIDEOS') && availableLocations.length > 1 && (
+                        <div className="mb-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="text-[10px] font-headline uppercase tracking-widest text-carbon/50">Filter by Location:</span>
+                                <span className="text-[10px] font-headline text-carbon/30">
+                                    {displayedAssets.length} {activePillar === 'IMAGES' ? 'images' : 'videos'}
+                                </span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {availableLocations.map(location => {
+                                    const isActive = selectedLocation === location;
+                                    const count = location === 'All'
+                                        ? customAssets.filter(a => a.type === (activePillar === 'IMAGES' ? 'image' : 'video') && !removedIds.has(a.id)).length
+                                        : customAssets.filter(a => a.type === (activePillar === 'IMAGES' ? 'image' : 'video') && a.location === location && !removedIds.has(a.id)).length;
+
+                                    return (
+                                        <button
+                                            key={location}
+                                            onClick={() => setSelectedLocation(location)}
+                                            className={`
+                                                px-4 py-2 text-[11px] font-bold uppercase tracking-widest border-2 
+                                                transition-all duration-200 hover:-translate-y-0.5
+                                                ${isActive
+                                                    ? 'bg-carbon text-white border-carbon shadow-[3px_3px_0_0_#025f1d]'
+                                                    : 'bg-lead-white text-carbon border-carbon hover:bg-carbon/5'
+                                                }
+                                            `}
+                                        >
+                                            {location} <span className={`ml-1 ${isActive ? 'text-white/60' : 'text-carbon/40'}`}>({count})</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     <div className="columns-2 md:columns-4 lg:columns-5 xl:columns-6 2xl:columns-8 gap-4 space-y-4">
                         {displayedAssets.map((asset) => (
                             <AssetCard
@@ -689,6 +787,48 @@ export default function App() {
                 asset={selectedAsset}
                 onClose={() => setSelectedAsset(null)}
             />
+
+            {/* EXPORT CODE MODAL */}
+            {exportCode && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-carbon/95 p-4">
+                    <div className="relative w-full max-w-4xl max-h-[80vh] bg-lead-white border-4 border-carbon flex flex-col shadow-[10px_10px_0px_0px_rgba(255,255,255,0.2)]">
+                        {/* Header */}
+                        <div className="p-6 border-b-4 border-carbon bg-oxidized-green">
+                            <h2 className="text-2xl font-black text-white uppercase tracking-tight">Export Code</h2>
+                            <p className="text-sm text-white/80 mt-2">Copy this code and paste it into App.jsx to make your deletions permanent</p>
+                        </div>
+
+                        {/* Code Textarea */}
+                        <div className="flex-grow p-6 overflow-hidden flex flex-col">
+                            <textarea
+                                readOnly
+                                value={exportCode}
+                                onClick={(e) => e.target.select()}
+                                className="w-full h-full font-mono text-xs bg-carbon text-white p-4 border-2 border-carbon resize-none focus:outline-none focus:ring-2 focus:ring-oxidized-green"
+                            />
+                        </div>
+
+                        {/* Footer Buttons */}
+                        <div className="p-6 border-t-4 border-carbon bg-lead-white flex gap-4">
+                            <button
+                                onClick={() => {
+                                    navigator.clipboard.writeText(exportCode);
+                                    alert('✅ Code copied to clipboard!');
+                                }}
+                                className="flex-1 h-12 bg-oxidized-green text-white font-bold uppercase tracking-widest hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                            >
+                                <Save className="w-4 h-4" /> Copy to Clipboard
+                            </button>
+                            <button
+                                onClick={() => setExportCode(null)}
+                                className="h-12 px-6 bg-carbon text-white font-bold uppercase tracking-widest hover:bg-zinc-800 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* CURATION CONTROLS */}
             <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
