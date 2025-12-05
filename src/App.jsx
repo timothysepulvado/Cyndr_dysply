@@ -908,33 +908,6 @@ export default function App() {
                 </div>
             )}
 
-            {/* CURATION CONTROLS */}
-            <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
-                <button
-                    onClick={() => setIsEditMode(!isEditMode)}
-                    className={`flex items-center gap-2 px-4 py-3 font-bold uppercase tracking-widest shadow-xl transition-all ${isEditMode ? 'bg-carbon text-white border-2 border-white' : 'bg-white text-carbon border-2 border-carbon'}`}
-                >
-                    <Edit3 className="w-4 h-4" /> {isEditMode ? 'Done Editing' : 'Edit Mode'}
-                </button>
-
-                {isEditMode && (
-                    <>
-                        <button
-                            onClick={handleExport}
-                            className="flex items-center gap-2 px-4 py-3 bg-oxidized-green text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-green-700 transition-colors"
-                        >
-                            <Save className="w-4 h-4" /> Export Code
-                        </button>
-
-                        <button
-                            onClick={handleReset}
-                            className="flex items-center gap-2 px-4 py-3 bg-heat text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-red-700 transition-colors"
-                        >
-                            <X className="w-4 h-4" /> Reset All
-                        </button>
-                    </>
-                )}
-            </div>
         </div>
     );
 }
