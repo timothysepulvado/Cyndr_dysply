@@ -170,7 +170,7 @@ const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark })
                         </div>
                     </div>
 
-                    {/* Edit Mode: Remove Button */}
+                    {/* Edit Mode: Remove Button - DISABLED FOR PRODUCTION
                     {isEditMode && (
                         <button
                             onClick={(e) => {
@@ -183,6 +183,7 @@ const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark })
                             <Trash2 className="w-4 h-4" />
                         </button>
                     )}
+                    */}
                 </div>
 
                 {/* Info Panel */}
@@ -395,7 +396,7 @@ const extractLocation = (filename) => {
     if (/MM07_/i.test(filename)) return 'Creative Studios';
     if (/MM12_/i.test(filename)) return 'Creative Studios';
     if (/MM17_/i.test(filename)) return 'Creative Studios';
-    if (/MM22_/i.test(filename)) return 'Creative Studios';
+    if (/MM22_/i.test(filename)) return 'Parks';  // Leather tote on park bench
     if (/MM24_/i.test(filename)) return 'Creative Studios';
     if (/MM43_/i.test(filename)) return 'Creative Studios';
 
@@ -458,26 +459,26 @@ const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafés', 'Creative Studios
 
 const getCustomAssets = () => {
     const imageFilenames = [
-        'MM01_Product_LeatherTote_Floor_4k.png',
+
         'MM02_Product_LeatherCap_Cafe_4k.png',
         'MM03_Product_Hoodie_CinemaChair_4k.png',
-        'MM04_Product_Tee_EditSuite_4k.png',
+
         'MM07_Life_Cap_Editor_4k.png',
         'MM08_Life_Hoodie_Creator_4k.png',
-        'MM11_Product_LeatherCap_Doorknob_4k.png',
+
         'MM12_Product_BlackTee_Chair_4k.png',
         'MM13_Product_LeatherTote_Subway_4k.png',
-        'MM17_Life_Tote_Designer_4k.png',
+
         'MM18_Life_Hoodie_Musician_4k.png',
-        'MM19_Life_Socks_Skater_4k.png',
+
         'MM21_Product_BlackTee_Bike_4k.png',
         'MM22_Product_LeatherTote_ParkBench_4k.png',
         'MM24_Product_LeatherCap_Amp_4k.png',
         'MM27_Life_Tee_Painter_4k.png',
         'MM40_Life_TruckerHat_Landscaper_4k.png',
-        'MM41_Life_Hoodie_NightEdit_4k.png',
+
         'MM42_Life_PrescriptionTee_Alley_4k.png',
-        'MM43_Product_Matchbooks_Bar_4k.png',
+
         'MM44_Product_Hat_NightDrive_4k.png',
         'S03_UrbanStreets_HoodieBackPrint_4x5.png',
         'S04_UrbanStreets_ToteStreetScene_16x9.png',
@@ -530,17 +531,17 @@ const getCustomAssets = () => {
         'S66_FIX_BlackHoodie_WindowLight_4x5.png',
         'S67_BlackHoodie_BackDetail_16x9.png',
         'S68_BlackHoodie_UrbanNight_9x16.png',
-        'S68_FIX_BlackHoodie_GoldenHour_9x16.png',
+
         'S69_FIX_BlackHoodie_StudioNatural_4x5.png',
         'S74_Bandana_Collection_16x9.png',
-        'S77_TruckerHat_CloseUp_4x5.png',
+
         'S83_LeatherCap_WornClose_16x9.png',
         'S84_LeatherSet_Matching_4x5.png',
         'S86_Socks_WithSkirt_4x5.png',
         'S88_Socks_OrangeActionShot_16x9.png',
         'S89_CanvasTote_WornSoft_4x5.png',
         'S90_LeatherTote_CafeScene_16x9.png',
-        'S91_MonochromeSocks_Platform_4x5.png',
+
         'S92_LeatherCap_BeingWorn_9x16.png',
         'S94_Socks_AllColors_Worn_4x5.png',
         'S95_LeatherTote_Contents_16x9.png',
@@ -665,6 +666,7 @@ export default function App() {
     });
     const [isEditMode, setIsEditMode] = useState(true);
     const [exportCode, setExportCode] = useState(null); // For showing export modal
+    const [showDeletedPanel, setShowDeletedPanel] = useState(false); // For showing deleted items
 
     // Save removed IDs to localStorage whenever they change
     useEffect(() => {
@@ -730,6 +732,19 @@ export default function App() {
         });
     };
 
+    const handleRestore = (id) => {
+        setRemovedIds(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+        });
+    };
+
+    // Get deleted assets for the panel
+    const deletedAssets = useMemo(() => {
+        return customAssets.filter(a => removedIds.has(a.id));
+    }, [customAssets, removedIds]);
+
     const handleExport = () => {
         const keptAssets = customAssets.filter(a => !removedIds.has(a.id));
         const keptImages = keptAssets.filter(a => a.type === 'image');
@@ -741,11 +756,55 @@ export default function App() {
             return url.substring(url.lastIndexOf('/') + 1);
         });
 
+        // Calculate category counts for images
+        const imageTargets = { 'Urban Streets': 12, 'Cafés': 10, 'Creative Studios': 14, 'Rooftops': 14, 'Parks': 10 };
+        const imageCounts = { 'Urban Streets': 0, 'Cafés': 0, 'Creative Studios': 0, 'Rooftops': 0, 'Parks': 0 };
+        keptImages.forEach(img => {
+            if (imageCounts[img.location] !== undefined) imageCounts[img.location]++;
+        });
+
+        // Calculate category counts for videos
+        const videoTargets = { 'Urban Streets': 8, 'Cafés': 6, 'Creative Studios': 10, 'Rooftops': 10, 'Parks': 6 };
+        const videoCounts = { 'Urban Streets': 0, 'Cafés': 0, 'Creative Studios': 0, 'Rooftops': 0, 'Parks': 0 };
+        keptAssets.filter(a => a.type === 'video').forEach(vid => {
+            if (videoCounts[vid.location] !== undefined) videoCounts[vid.location]++;
+        });
+
         // Generate ready-to-paste code
         const imageArrayCode = `const imageFilenames = [\n${keptImageFilenames.map(name => `    '${name}'`).join(',\n')}\n];`;
         const videoArrayCode = `const videoUrls = [\n${keptVideos.map(url => `    '${url}'`).join(',\n')}\n];`;
 
-        const fullExportCode = `// ===== PASTE THIS INTO App.jsx =====\n\n// Replace imageFilenames array (around line 364):\n${imageArrayCode}\n\n// Replace videoUrls array (around line 368):\n${videoArrayCode}\n\n// === STATS ===\n// Images - Kept: ${keptImageFilenames.length}, Removed: ${customAssets.filter(a => a.type === 'image').length - keptImageFilenames.length}\n// Videos - Kept: ${keptVideos.length}, Removed: ${customAssets.filter(a => a.type === 'video').length - keptVideos.length}`;
+        // Build detailed stats
+        const totalImagesRemoved = customAssets.filter(a => a.type === 'image').length - keptImageFilenames.length;
+        const totalVideosRemoved = customAssets.filter(a => a.type === 'video').length - keptVideos.length;
+
+        let statsBlock = `// ===== REMOVAL SUMMARY =====\n`;
+        statsBlock += `// IMAGES: Removing ${totalImagesRemoved} (${customAssets.filter(a => a.type === 'image').length} → ${keptImageFilenames.length})\n`;
+        statsBlock += `// VIDEOS: Removing ${totalVideosRemoved} (${customAssets.filter(a => a.type === 'video').length} → ${keptVideos.length})\n\n`;
+
+        statsBlock += `// ===== IMAGE BREAKDOWN BY CATEGORY =====\n`;
+        statsBlock += `// Category          | Current | Target | Status\n`;
+        for (const cat of ['Urban Streets', 'Cafés', 'Creative Studios', 'Rooftops', 'Parks']) {
+            const current = imageCounts[cat];
+            const target = imageTargets[cat];
+            const diff = current - target;
+            const status = diff === 0 ? '✅ DONE' : (diff > 0 ? `${diff} over` : `${Math.abs(diff)} under`);
+            statsBlock += `// ${cat.padEnd(18)} | ${String(current).padStart(7)} | ${String(target).padStart(6)} | ${status}\n`;
+        }
+        statsBlock += `// ${'TOTAL'.padEnd(18)} | ${String(keptImageFilenames.length).padStart(7)} | ${String(60).padStart(6)} |\n\n`;
+
+        statsBlock += `// ===== VIDEO BREAKDOWN BY CATEGORY =====\n`;
+        statsBlock += `// Category          | Current | Target | Status\n`;
+        for (const cat of ['Urban Streets', 'Cafés', 'Creative Studios', 'Rooftops', 'Parks']) {
+            const current = videoCounts[cat];
+            const target = videoTargets[cat];
+            const diff = current - target;
+            const status = diff === 0 ? '✅ DONE' : (diff > 0 ? `${diff} over` : `${Math.abs(diff)} under`);
+            statsBlock += `// ${cat.padEnd(18)} | ${String(current).padStart(7)} | ${String(target).padStart(6)} | ${status}\n`;
+        }
+        statsBlock += `// ${'TOTAL'.padEnd(18)} | ${String(keptVideos.length).padStart(7)} | ${String(40).padStart(6)} |`;
+
+        const fullExportCode = `// ===== PASTE THIS INTO App.jsx =====\n\n// Replace imageFilenames array (around line 460):\n${imageArrayCode}\n\n// Replace videoUrls array (around line 550):\n${videoArrayCode}\n\n${statsBlock}`;
 
         // Show in modal
         setExportCode(fullExportCode);
@@ -918,7 +977,7 @@ export default function App() {
                 </div>
             )}
 
-            {/* CURATION CONTROLS */}
+            {/* CURATION CONTROLS - DISABLED FOR PRODUCTION
             <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
                 <button
                     onClick={() => setIsEditMode(!isEditMode)}
@@ -929,6 +988,13 @@ export default function App() {
 
                 {isEditMode && (
                     <>
+                        <button
+                            onClick={() => setShowDeletedPanel(true)}
+                            className="flex items-center gap-2 px-4 py-3 bg-zinc-700 text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-zinc-600 transition-colors"
+                        >
+                            <Trash2 className="w-4 h-4" /> View Deleted ({deletedAssets.length})
+                        </button>
+
                         <button
                             onClick={handleExport}
                             className="flex items-center gap-2 px-4 py-3 bg-oxidized-green text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-green-700 transition-colors"
@@ -945,6 +1011,10 @@ export default function App() {
                     </>
                 )}
             </div>
+            */}
+
+            {/* DELETED ITEMS PANEL - REMOVED FOR PRODUCTION */}
         </div>
     );
 }
+
