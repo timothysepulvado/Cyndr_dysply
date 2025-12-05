@@ -310,10 +310,7 @@ const Footer = () => (
                     Modern Content, <span className="text-zinc-500">Powered by Design.</span>
                 </p>
             </div>
-            <div className="flex flex-col items-center md:items-end gap-4">
-                <div className="w-16 h-16 border-2 border-white rounded-full flex items-center justify-center">
-                    <span className="font-serif italic text-2xl">C</span>
-                </div>
+            <div className="flex flex-col items-center md:items-end gap-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">BrandStudios.Ai</span>
                 <span className="text-[10px] text-zinc-600">© 2025 CYLNDR STUDIOS</span>
             </div>
