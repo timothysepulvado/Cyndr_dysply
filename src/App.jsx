@@ -304,16 +304,31 @@ const DetailView = ({ asset, onClose }) => {
 
 const Footer = () => (
     <footer className="bg-carbon text-white py-12 border-t-4 border-white">
-        <div className="max-w-[2000px] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="max-w-[2000px] mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
-                <p className="text-xl md:text-3xl font-black uppercase leading-[0.9] tracking-tighter text-white">
-                    Modern Content, <span className="text-zinc-500">Powered by Design.</span>
+                <h4 className="text-[10px] font-headline text-carbon/50 uppercase tracking-widest mb-4">Leadership</h4>
+                <ul className="space-y-2 text-xs font-bold uppercase tracking-wide text-zinc-300">
+                    <li>Sylvain Tron <span className="text-carbon/60 ml-1">// MD</span></li>
+                    <li>Kara O'Halloran <span className="text-carbon/60 ml-1">// Exec Dir</span></li>
+                    <li>Suz Keen <span className="text-carbon/60 ml-1">// ECD</span></li>
+                    <li>Can Misirlioglu <span className="text-carbon/60 ml-1">// ECD</span></li>
+                    <li>Abby Bako <span className="text-carbon/60 ml-1">// Dir Inf</span></li>
+                </ul>
+            </div>
+            <div className="md:col-span-2">
+                <h4 className="text-[10px] font-headline text-carbon/50 uppercase tracking-widest mb-4">Statement</h4>
+                <p className="text-xl md:text-3xl font-black uppercase leading-[0.9] tracking-tighter text-white max-w-lg">
+                    Modern Content, <span className="text-carbon/50">Powered by Design.</span>
                 </p>
             </div>
-            <div className="flex flex-col items-center md:items-end gap-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">BrandStudios.Ai</span>
-                <span className="text-[10px] text-zinc-600">© 2025 CYLNDR STUDIOS</span>
+            {/*
+                <div className="flex flex-col justify-between items-start md:items-end">
+                <div className="w-16 h-16 border-2 border-white rounded-full flex items-center justify-center mb-4">
+                    <span className="font-serif italic text-2xl">C</span>
+                </div>
+                <span className="text-[10px] font-headline text-carbon/50">© 2025 CYLNDR STUDIOS</span>
             </div>
+            */}
         </div>
     </footer>
 );
@@ -367,6 +382,9 @@ const extractLocation = (filename) => {
     if (/MM18_/i.test(filename)) return 'Rooftops';  // Musician
     if (/MM08_/i.test(filename)) return 'Rooftops';  // Creator
     if (/MM04_/i.test(filename)) return 'Rooftops';  // Edit suite
+    if (/MM03_/i.test(filename)) return 'Rooftops';  // Hoodie on cinema chair
+    if (/MM43_/i.test(filename)) return 'Rooftops';  // Matchbooks bar
+    if (/S86_Socks/i.test(filename)) return 'Rooftops';  // Socks with skirt
 
     // Creative Studios (rest go here)
     if (/MM27_/i.test(filename)) return 'Creative Studios';
@@ -480,10 +498,14 @@ const getCustomAssets = () => {
         'S28_Studios_PrescriptionTee_Laydown_9x16.png',
         'S29_Studios_OrangeSocks_9x16.png',
         'S30_Studios_EngineBlockTee_Laydown_9x16.png',
+        'S31_Rooftops_HoodieSilhouette_4x5.png',
         'S32_Rooftops_GreenHat_4x5.png',
+        'S34_Rooftops_ToteOnLedge_16x9.png',
         'S35_Rooftops_BlackDevineTee_16x9.png',
         'S36_Rooftops_ContentMachineTee_16x9.png',
+        'S37_Rooftops_MeltingPotTee_9x16.png',
         'S39_Rooftops_NalgeneCityView_9x16.png',
+        'MM45_Life_CombustionTee_Rooftop_4k.png',
         'S40_Parks_CanvasTote_4x5.png',
         'S41_Parks_GreenCardigan_4x5.png',
         'S42_Parks_GymTowel_16x9.png',
@@ -640,7 +662,7 @@ export default function App() {
         const saved = localStorage.getItem('cylndr-removed-assets');
         return saved ? new Set(JSON.parse(saved)) : new Set();
     });
-    const [isEditMode, setIsEditMode] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false); // Disabled for production
     const [exportCode, setExportCode] = useState(null); // For showing export modal
 
     // Save removed IDs to localStorage whenever they change
@@ -895,6 +917,34 @@ export default function App() {
                 </div>
             )}
 
+            {/* CURATION CONTROLS - Hidden on production
+            <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
+                <button
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    className={`flex items-center gap-2 px-4 py-3 font-bold uppercase tracking-widest shadow-xl transition-all ${isEditMode ? 'bg-carbon text-white border-2 border-white' : 'bg-white text-carbon border-2 border-carbon'}`}
+                >
+                    <Edit3 className="w-4 h-4" /> {isEditMode ? 'Done Editing' : 'Edit Mode'}
+                </button>
+
+                {isEditMode && (
+                    <>
+                        <button
+                            onClick={handleExport}
+                            className="flex items-center gap-2 px-4 py-3 bg-oxidized-green text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-green-700 transition-colors"
+                        >
+                            <Save className="w-4 h-4" /> Export Code
+                        </button>
+
+                        <button
+                            onClick={handleReset}
+                            className="flex items-center gap-2 px-4 py-3 bg-heat text-white font-bold uppercase tracking-widest shadow-xl border-2 border-white hover:bg-red-700 transition-colors"
+                        >
+                            <X className="w-4 h-4" /> Reset All
+                        </button>
+                    </>
+                )}
+            </div>
+            */}
         </div>
     );
 }
