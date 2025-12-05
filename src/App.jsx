@@ -385,6 +385,7 @@ const extractLocation = (filename) => {
     if (/MM03_/i.test(filename)) return 'Rooftops';  // Hoodie on cinema chair
     if (/MM43_/i.test(filename)) return 'Rooftops';  // Matchbooks bar
     if (/S86_Socks/i.test(filename)) return 'Rooftops';  // Socks with skirt
+    if (/MM45_/i.test(filename)) return 'Rooftops';  // Combustion tee rooftop
 
     // Creative Studios (rest go here)
     if (/MM27_/i.test(filename)) return 'Creative Studios';
@@ -398,9 +399,9 @@ const extractLocation = (filename) => {
     if (/MM24_/i.test(filename)) return 'Creative Studios';
     if (/MM43_/i.test(filename)) return 'Creative Studios';
 
-    // Remaining MM_ Merch series -> Separate "Merch" category for easy identification
+    // Remaining MM_ series -> Route to Rooftops as fallback
     if (/MM\d+_/i.test(filename)) {
-        return 'Merch';
+        return 'Rooftops';
     }
 
     // Priority patterns - check these first (most specific)
@@ -452,8 +453,8 @@ const extractLocation = (filename) => {
     return 'Creative Studios';
 };
 
-// Location categories (Merch is separate for curation visibility)
-const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafés', 'Creative Studios', 'Rooftops', 'Parks', 'Merch'];
+// Location categories (5 main categories)
+const LOCATION_CATEGORIES = ['All', 'Urban Streets', 'Cafés', 'Creative Studios', 'Rooftops', 'Parks'];
 
 const getCustomAssets = () => {
     const imageFilenames = [
