@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Play, X, Aperture, Clock, Download, Share2, Activity, Maximize2, Grid, Hexagon, Zap, Layers, Box, Trash2, Save, Edit3 } from 'lucide-react';
 
 /**
@@ -119,6 +119,59 @@ const Header = ({ activePillar, setActivePillar }) => {
     );
 };
 
+// Lazy-mount video with IntersectionObserver: only fetches/plays when near-visible,
+// pauses when off-screen. Keeps the "wall of motion" feel without hammering the network.
+const LazyVideo = ({ src, className }) => {
+    const wrapperRef = useRef(null);
+    const videoRef = useRef(null);
+    const [shouldMount, setShouldMount] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        const el = wrapperRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setShouldMount(true);
+                    setIsVisible(true);
+                } else {
+                    setIsVisible(false);
+                }
+            },
+            { rootMargin: '300px' }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        const v = videoRef.current;
+        if (!v) return;
+        if (isVisible) {
+            v.play().catch(() => {});
+        } else {
+            v.pause();
+        }
+    }, [isVisible, shouldMount]);
+
+    return (
+        <div ref={wrapperRef} className="w-full h-full bg-carbon">
+            {shouldMount && (
+                <video
+                    ref={videoRef}
+                    src={src}
+                    className={className}
+                    loop
+                    muted
+                    playsInline
+                    preload="none"
+                />
+            )}
+        </div>
+    );
+};
+
 const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark }) => {
     return (
         <div
@@ -146,13 +199,9 @@ const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark })
                     />
 
                     {asset.type === 'video' ? (
-                        <video
+                        <LazyVideo
                             src={asset.url}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
                         />
                     ) : (
                         <img
@@ -170,7 +219,7 @@ const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark })
                         </div>
                     </div>
 
-                    {/* Edit Mode: Remove Button - DISABLED FOR PRODUCTION
+                    {/* Edit Mode: Remove Button */}
                     {isEditMode && (
                         <button
                             onClick={(e) => {
@@ -183,7 +232,6 @@ const AssetCard = ({ asset, onClick, onRemove, isEditMode, themeColor, isDark })
                             <Trash2 className="w-4 h-4" />
                         </button>
                     )}
-                    */}
                 </div>
 
                 {/* Info Panel */}
@@ -292,10 +340,28 @@ const DetailView = ({ asset, onClose }) => {
                         </div>
                     </div>
 
-                    <div className="p-6 border-t-4 border-carbon bg-lead-white mt-auto">
+                    <div className="p-6 border-t-4 border-carbon bg-lead-white mt-auto space-y-4">
                         <button className="w-full h-14 bg-carbon text-white font-bold uppercase tracking-[0.2em] hover:bg-zinc-800 transition-colors flex items-center justify-center gap-3">
                             <Download className="w-4 h-4" /> Download Asset
                         </button>
+
+                        {/* Approval Controls (Visual Only) */}
+                        <div className="flex gap-3">
+                            <button className="flex-1 h-12 bg-oxidized-green text-white font-bold uppercase tracking-widest hover:bg-green-700 transition-colors border-2 border-carbon">
+                                Approve
+                            </button>
+                            <button className="flex-1 h-12 bg-heat text-white font-bold uppercase tracking-widest hover:bg-red-700 transition-colors border-2 border-carbon">
+                                Deny
+                            </button>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-headline text-carbon/60 uppercase tracking-widest">Revision Notes</label>
+                            <textarea
+                                placeholder="Make changes..."
+                                className="w-full h-20 p-3 border-2 border-carbon bg-white text-sm font-headline placeholder:text-carbon/40 focus:outline-none focus:ring-2 focus:ring-oxidized-green resize-none"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -664,7 +730,7 @@ export default function App() {
         const saved = localStorage.getItem('cylndr-removed-assets');
         return saved ? new Set(JSON.parse(saved)) : new Set();
     });
-    const [isEditMode, setIsEditMode] = useState(true);
+    const [isEditMode, setIsEditMode] = useState(false);
     const [exportCode, setExportCode] = useState(null); // For showing export modal
     const [showDeletedPanel, setShowDeletedPanel] = useState(false); // For showing deleted items
 
@@ -977,7 +1043,7 @@ export default function App() {
                 </div>
             )}
 
-            {/* CURATION CONTROLS - DISABLED FOR PRODUCTION
+            {/* CURATION CONTROLS — disabled for production display
             <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
                 <button
                     onClick={() => setIsEditMode(!isEditMode)}
