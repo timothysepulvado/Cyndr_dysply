@@ -36,3 +36,10 @@ Conventions:
 
 Team rules (both agents):
 Domain tag for logs/status is `cylndr` (`$BRANDY_DOMAIN`). Read `~/agent-vault/domains/cylndr/MISSION.md` before non-trivial work. Status via `~/brandy-agent-team/scripts/status.sh save <agent> cylndr "..."`; never edit `~/agent-vault/status/*.md` directly. Karl logs via `~/brandy-agent-team/scripts/vault-log-append.sh cylndr "..."`; Jackie does not write the daily log (validator logs for her). Vault commits only via `~/brandy-agent-team/scripts/vault-commit.sh`. Supabase is project-scoped: use this repo's `.mcp.json`/scripts only; if none, ask before any Supabase command.
+
+## Archived memory & evidence — where to find it (2026-10-29)
+- Daily logs older than 7 days: `~/agent-vault-archive/daily/` (LOCAL primary on every machine). T7 mirror: `/Volumes/T7 Shield/brandstudios-vault-archive/daily/` — nightly 03:00 via `daily-cleanup.sh` → `archive-logs.sh`, best-effort only when the T7 is mounted; never treat the T7 as the source of truth or block on it being absent.
+- Transcripts older than 30 days: `~/agent-vault-archive/transcripts/<project>/` (T7 mirror `/Volumes/T7 Shield/brandstudios-vault-archive/transcripts/`).
+- Evidence: `~/BSAI-OS-evidence/` is the primary. T7 mirror = the APFS image `/Volumes/T7 Shield/brandstudios-vault-archive/BSAI-OS-evidence.sparsebundle` (double-click or `hdiutil attach` mounts it at `/Volumes/BSAI-OS-evidence-mirror/BSAI-OS-evidence/`); `~/brandy-agent-team/scripts/evidence-mirror.sh` runs nightly from `daily-cleanup.sh`, additive — the T7 copy never deletes.
+- Also on the T7 under `brandstudios-vault-archive/`: `status-backups/`, `codex-sessions/`, `purges/`.
+- Per-domain status history: `~/agent-vault/status/archive/{agent}-{domain}.md` (rotated by `status.sh`; newest 12 states stay in `status/{agent}-{domain}.md`).
